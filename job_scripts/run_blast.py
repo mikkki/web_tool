@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #					#
-#	Script for blastdb creation	#
+#	Script for initiating blastn 	#
 #	p_bacster NCGR			#
 #					#
 

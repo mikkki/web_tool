@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #					#
-#	Script for blastdb creation	#
+#	Script for bgzip compression	#
 #	p_bacster NCGR			#
 #					#
 
