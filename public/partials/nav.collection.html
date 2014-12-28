@@ -1,0 +1,20 @@
+<!-- partial for nav state nav.collection -->
+
+<h2>My Selected BACs</h2>
+
+<div class="gridStyle" ng-grid="gridOptions"></div>
+
+<div>
+  <kendo-button class="k-primary"
+                ui-sref="nav.form-generate">
+    <span class="k-icon k-i-plus"></span>
+    Create Biotracker form
+  </kendo-button>
+</div>
+<br>
+<div>
+  <kendo-button ng-click="onEmpty()">
+    <span class="k-icon k-i-cancel"></span>
+    Clear all BACs
+  </kendo-button>
+</div>

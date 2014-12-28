@@ -1,0 +1,64 @@
+<!-- partial for root nav state. 'nav' is the root ui state, and contains all
+the persistent navigation elements, background image etc. -->
+
+<div class="pure-g">
+  
+  <div class="pure-u-1-24">
+    <!-- left margin. could be altered to be responsive -->
+  </div>
+  
+  <div class="pure-u-22-24" style="padding: 1em 0 0 0">
+    <!-- center column, main content. could be altered to be responsive -->
+    <div class="content box-1-em">
+      <a ui-sref="nav.home"><img src="/static/images/pioneer-logo.png" style="vertical-align: middle"></a>
+      
+      <h1 style="display: inline">BACster</h1>
+      
+      <div style="display: inline-block">
+        <ul kendo-menu style="display: inline-block"
+            k-orientation="'horizontal'"
+            k-on-select="onSelect(kendoEvent)">
+          <li>
+            <a ui-sref="nav.home">Home</a>
+          </li>
+          <li><a ui-sref="nav.logs">Work Logs</a></li>
+          <li><a ui-sref="nav.help">Help</a></li>
+        </ul>
+        <span ng-if="session.data().user">
+          <ul kendo-menu style="display: inline-block"
+              k-orientation="'horizontal'"
+              k-on-select="onSelect(kendoEvent)">
+            
+            <li><a ui-sref="nav.search">Search</a></li>
+            <li><a ui-sref="nav.collection">My BACs</a></li>
+            <li><a ui-sref="nav.form-generate">
+              <span class="k-icon k-i-plus"></span>
+              Biotracker
+            </a></li>
+          </ul>
+        </span>
+      </div>
+      
+      <div ui-view>
+        <!-- angular-js will load the child ui-state into this div -->
+      </div>
+
+      <br>
+      
+      <div ng-if="session.data().user">
+        <span class="k-icon k-i-note"></span>
+        Session info
+        [ {{ session.data().user.pioneerId }} ;
+          {{ session.data().user.notes }} ;
+        started {{ session.data().user.timestamp }}
+        ]
+        Not you? <a href="" ng-click="session.newSession()">Start New Session</a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div class="pure-u-1-24">
+    <!-- right margin, could be altered to be responsive -->
+  </div>
+</div>

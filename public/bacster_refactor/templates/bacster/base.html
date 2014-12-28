@@ -1,0 +1,83 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    {% block import %}
+    {% endblock %}
+
+    {% block fake %}
+    {% endblock %}
+</head>
+<body>
+    
+        <div id="example">
+
+            <div class="demo-section k-header">
+                <h4>Kendo UI Button with icons</h4>
+                <button type="button" id="iconButton">Sprite icon</button>
+                <button type="button" id="kendoIconButton">Kendo UI sprite icon</button>
+                <button type="button" id="imageButton">Image icon</button>
+            </div>
+
+            <script>
+                $(document).ready(function() {
+                    $("#iconButton").kendoButton({
+                        spriteCssClass: "k-icon netherlandsFlag"
+                    });
+
+                    $("#kendoIconButton").kendoButton({
+                        icon: "funnel"
+                    });
+
+                    $("#imageButton").kendoButton({
+                        imageUrl: "../content/shared/icons/sports/snowboarding.png"
+                    });
+                });
+            </script>
+
+            <style scoped>
+                .k-button .k-image {
+                    height: 16px;
+                }
+                .demo-section {
+                    width: 500px;
+                }
+                .netherlandsFlag {
+                    background-image: url("../content/shared/styles/flags.png");
+                    background-position: 0 -64px;
+                }
+            </style>
+        </div>
+
+<div id="example2" ng-app="KendoDemos">
+    <div ng-controller="MyCtrl">
+        <div class="demo-section k-content">
+            <button class="k-button" ng-show="!win1visible" ng-click="win1.open()">Open Calendar</button>
+            <button class="k-button" ng-show="!win2visible" ng-click="win2.open()">Open AJAX content</button>
+        </div>
+        <div kendo-window="win1" k-title="'Calendar'" k-on-open="win1visible = true" k-on-close="win1visible = false">
+            <div kendo-calendar></div>
+        </div>
+      
+        <div kendo-window="win2" k-title="'AJAX content'"
+            k-width="600" k-height="200" k-visible="false"
+            k-content="{ url: 'index.html' }"
+            k-on-open="win2visible = true" k-on-close="win2visible = false"></div>
+      
+    </div>
+    <style scoped>
+        .example {
+            min-height: 400px;
+        }
+    </style>
+</div>
+
+<script>
+  angular.module("KendoDemos", [ "kendo.directives" ])
+      .controller("MyCtrl", function($scope){
+          $scope.hello = "Hello from Controller!";
+      })
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+/* styles for bacster web app */
+
+body { 
+    background: url(../images/zeama.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+div.content {
+    background-color: white;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #6d281a;
+}
+
+.box-1-em {
+    padding: 1em;
+}
+
+.bac-list-row {
+    display: block;
+}
+
+.bac-list-cell {
+    display: inline-block;
+}
+
+.gridStyle {
+    border: 1px solid rgb(212,212,212);
+    width: 100%;
+    height: auto; /* see flexible height plugin in controller.js ! */
+}
+
+/* ng-grid is adding scrollbars to the grid even though the flexible 
+   height plugin is enabled */
+.ngViewport {
+    overflow: hidden;
+}
+
+label {
+    white-space: nowrap;
+}
+
+fieldset { 
+    display: block;
+    margin-left: 0.1em;
+    margin-right: 0;
+    padding-top: 1em;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border: 0;
+}
+
+textarea.fixed-width {
+    font-family: monospace;
+}

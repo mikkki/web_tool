@@ -1,0 +1,30 @@
+<!-- partial for nav state nav.new-session -->
+
+<h2>New Session</h2>
+
+<div class="k-block k-info-colored">
+  Please enter your Pioneer ID and a short description of this work
+  session. This info will appear in the <a ui-sref="nav.logs">Work Logs</a>
+  section of the web tool, so other users and may look at results of
+  interest!
+</div>
+<br>
+<div class="k-block">
+  <form ng-submit="startSession()">
+    <input id="session-pioneer-id"
+           type="text"
+           class="k-textbox"
+           name="pioneer-id"
+           ng-model="user.pioneerId"
+           placeholder="your Pioneer ID" required autofocus>
+    
+    <input type="text" class="k-textbox medium" name="session-notes"
+           ng-model="user.notes"
+           placeholder="session notes / description" required>
+    
+    <button type="submit" class="k-button k-primary" value="Save">
+      <span class="k-icon k-i-tick"></span>
+      Save
+    </input>
+  </form>
+</div>

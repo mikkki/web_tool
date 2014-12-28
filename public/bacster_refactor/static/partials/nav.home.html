@@ -1,0 +1,28 @@
+<!-- partial for nav state nav.home -->
+
+<h2>Welcome</h2>
+
+<p>Purpose of BAC-ster:</p>
+
+<ul>
+  <li>Identify a BAC for a target sequence to submit to sequencing lab</li>
+  <li>Select a BAC tiling path based on B73 coordinates</li>
+</ul>
+
+<div ng-if="!session.data().user">
+  <div class="k-block k-info-colored">
+    To begin, please start a new session!
+  </div>
+  <br>
+  <kendo-button class="k-primary" ng-click="session.newSession()">
+    <span class="k-icon k-i-plus"></span>
+    New Session
+  </kendo-button>
+</div>
+
+<div ng-if="session.data().user">
+  <kendo-button class="k-primary" ui-sref="nav.search">
+    <span class="k-icon k-i-search"></span>
+    Start New Search
+  </kendo-button>
+</div>

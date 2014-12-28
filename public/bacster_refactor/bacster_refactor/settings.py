@@ -10,8 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+PUBLIC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -21,6 +22,8 @@ SECRET_KEY = 'e_o&=@tcqwm4(v)+b(6zn5ned=3%wos_yxd!1=b0zoq2j!ep$5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+COMPRESS_ENABLED = True
 
 TEMPLATE_DEBUG = True
 
@@ -36,6 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'compressor',
+    'bacster',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -63,6 +68,9 @@ DATABASES = {
     }
 }
 
+COMPRESS_JS_FILTERS = (
+    'compressor.filters.template.TemplateFilter',
+)
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
@@ -76,8 +84,32 @@ USE_L10N = True
 
 USE_TZ = True
 
+TEMPLATE_DIRS = (
+	os.path.join(BASE_DIR, 'templates'),
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+
+         (os.path.join(PUBLIC_DIR, 'bower_components')),
+         ("images", os.path.join(PUBLIC_DIR, 'images')),
+         ("css", os.path.join(PUBLIC_DIR, 'css')),
+         ("js", os.path.join(PUBLIC_DIR, 'js')),
+         ("partials", os.path.join(PUBLIC_DIR, 'partials')),
+#         ("kendo_static", os.path.join(BASE_DIR, 'django_kendo_static')),
+
+#       ("css", STATIC_ROOT),
+#       ("js" , STATIC_ROOT)
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
