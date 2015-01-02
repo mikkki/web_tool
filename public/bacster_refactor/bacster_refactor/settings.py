@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'compressor',
     'bacster',
+    'djangular',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -63,10 +64,14 @@ WSGI_APPLICATION = 'bacster_refactor.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': 'bacster',
+    'USER': 'bacster_dbo',
+    'PASSWORD': 'h0^odprE',
+    'HOST': 'barclay',
+    'PORT': '',
+        }
     }
-}
 
 COMPRESS_JS_FILTERS = (
     'compressor.filters.template.TemplateFilter',
@@ -97,14 +102,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
 
          (os.path.join(PUBLIC_DIR, 'bower_components')),
-         ("images", os.path.join(PUBLIC_DIR, 'images')),
-         ("css", os.path.join(PUBLIC_DIR, 'css')),
-         ("js", os.path.join(PUBLIC_DIR, 'js')),
+         ("images",   os.path.join(PUBLIC_DIR, 'images')),
+         ("css",      os.path.join(PUBLIC_DIR, 'css')),
+         ("js",       os.path.join(PUBLIC_DIR, 'js')),
          ("partials", os.path.join(PUBLIC_DIR, 'partials')),
-#         ("kendo_static", os.path.join(BASE_DIR, 'django_kendo_static')),
-
-#       ("css", STATIC_ROOT),
-#       ("js" , STATIC_ROOT)
+         ("samples",  os.path.join(PUBLIC_DIR, 'samples')),
+         ("djangular",  os.path.join(PUBLIC_DIR, 'djangular')),
 )
 
 STATICFILES_FINDERS = (
@@ -113,3 +116,15 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS= (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_procssors.messages',
+    'django.core.context_processors.request',
+    'django.core.context_processors.csrf',
+
+)

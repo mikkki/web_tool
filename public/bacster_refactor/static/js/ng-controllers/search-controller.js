@@ -3,14 +3,23 @@
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, 
-					    session, workLog) {
+app.controller('searchController', function($scope, $state, $http, $resource,
+					    Session, session, workLog) {
 
-  // make session available in the view's scope
+  // make session available in the view''s scope
   $scope.session = session;
-
+  //$scope.models = Session.query(); // array
   
-  // start a hash for search info in session, if it doesn't exist yet
+  var entry = Session.get({pk: 33});
+  console.log("entry: " + JSON.stringify(entry));
+
+  // Getting the current Session object
+  var sess = $resource('crud/sessioninfo/:pk.json', {"pk": 5});
+  var s = sess.query({"pk": 5}, function(){
+      console.log("my database session: " + JSON.stringify(s));  
+  });
+
+  // start a hash for search info in session, if it doesn''t exist yet
   if( ! session.data().search ) {
     session.data().search = { targets : [] };
   }
@@ -171,7 +180,7 @@ app.controller('searchController', function($scope, $state, $http,
 
   // callback for fasta example data button
   $scope.onAddExampleFasta = function() {
-    $http({method: 'GET', url: '/search-example.fa'}).
+    $http({method: 'GET', url: '{{ STATIC_URL }}samples/search-example.fa'}).
       success(function(data, status, headers, config) {
 	$scope.data.addFasta = data;
       }).

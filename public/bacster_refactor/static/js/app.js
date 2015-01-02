@@ -1,15 +1,14 @@
 // instantiate angular-js web app named bacster
 
 var app = angular.module('bacster', ['ui.router', 'kendo.directives',
-				      'ngCookies', 'ngGrid']);
+				      'ngCookies', 'ngGrid', 'ngResource']);
 
-
-app.config( function($stateProvider, $urlRouterProvider) {
-
+app.config( function($httpProvider, $stateProvider, $urlRouterProvider) {
   /* Create url routes, and a root ui state named 'nav'. All other ui
    * states are declared to be children of nav. Nav state partials
    * will get loaded into the template nav.html.
    */
+  $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   $stateProvider
     .state('nav', {
       url: '/',
@@ -69,7 +68,7 @@ app.config( function($stateProvider, $urlRouterProvider) {
 app.run( function ($rootScope, $state, $stateParams) {
   
   /* 
-   * It's very handy to add references to $state and $stateParams to the
+   * It''s very handy to add references to $state and $stateParams to the
    * $rootScope so that you can access them from any scope within your
    * applications.For example, <li ng-class="{ active:
    * $state.includes('contacts.list') }"> will set the <li> to active
@@ -78,3 +77,11 @@ app.run( function ($rootScope, $state, $stateParams) {
   $rootScope.$state = $state;
   $rootScope.$stateParams = $stateParams;
 });
+
+app.run(
+    function($http, $cookies) {
+        $http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken;
+        // Add the following two lines
+        $http.defaults.xsrfCookieName = 'csrftoken';
+        $http.defaults.xsrfHeaderName = 'X-CSRFToken';
+    });

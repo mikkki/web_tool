@@ -1,9 +1,8 @@
 Django==1.7.1
-JsonUtils==0.1
+
 django-appconf==0.6
 django-compressor==1.4
 django-kendoui-backend==0.6
-ez-setup==0.9
 json-utils==0.2
 node==0.9.14
 odict==1.5.1
