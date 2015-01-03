@@ -5,6 +5,11 @@ from django.template import Template, Context
 import json
 from django.core.context_processors import csrf
 
+from djangular.views.crud import NgCRUDView
+import MySQLdb
+from django.db import models
+from bacster.models import Session
+
 def index(request, template_name):
     c = {}
     c.update(csrf(request))
@@ -12,9 +17,5 @@ def index(request, template_name):
     #print template_name
     #return render_to_response('bacster/index.html')
 # Create your views here.
-
-#class sessionCRUDView(NgCRUDView):
-#            model = Session
             
-#class mysessionCRUDView(NgCRUDView):
-#             model = Session
+

@@ -4,17 +4,7 @@
  */
 
 app.factory('Session', ['$resource', function($resource) {
-	return $resource('/crud/sessioninfo.json', {"pk": "@pk"}, {});  
-}]);
-
-app.factory('mySession', ['$resource', function($resource) {
-    return $resource('crud/sessioninfo/:pk.json', { pk:'@pk' }, {
-      'get': { method: 'GET'},
-      'save':   {method:'POST'},
-      'query':  {method:'GET', isArray:true},
-      'remove': {method:'DELETE'},
-      'delete': {method:'DELETE'},	
-    });
+	return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:false}});  
 }]);
 
 app.factory('session', function($state, $cookieStore, Session) {

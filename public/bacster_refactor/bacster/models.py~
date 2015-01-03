@@ -36,8 +36,8 @@ class BacSession(models.Model):
         session = models.ForeignKey(Session)
 
 class sessionCRUDView(NgCRUDView):
-	model = Session
-	
+        model = Session
+
 class mysessionCRUDView(NgCRUDView):
-	model = Session
+        model = Session
 # Create your models here.
