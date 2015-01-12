@@ -11,6 +11,7 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
 
   // a model for data binding
   $scope.user = {
+    id : '',
     pioneerId : '',
     notes : ''
   };
@@ -26,6 +27,7 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
     // TODO: user input validation
     
     session.data().user = {
+      id: '', 
       pioneerId : $scope.user.pioneerId,
       notes : $scope.user.notes,
       timestamp : new Date().toLocaleDateString("en-US")
@@ -34,9 +36,17 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
 
     var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
     new_session.$save(function(){
-	$scope.models.push(new_session);
+      new_id = $scope.models.push(new_session);
+      $scope.user.id = new_id;
+      session.data().user.id = new_id;
+      session.save();
+
+      console.log("new ID:  " + new_id);  
+      console.log("session ID:  " + JSON.stringify(session.data().user.id));
+      console.log("scope.user ID :  " + JSON.stringify($scope.user));
     }); // In callback we push our new object to the models array
-  
+
+
     // use the ui-router service to redirect user to home now that a
     // session is established
     $state.go('nav.home');
