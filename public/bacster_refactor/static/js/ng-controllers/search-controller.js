@@ -13,12 +13,13 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // Getting the current Session object
   var sess = $resource('crud/sessioninfo/', {"pk": "@pk"});
    
-  /*
-  var s = sess.get({pk: 62}, function(){
+  console.log("my session.user.id: " + JSON.stringify(session.data().user.id));
+
+  var s = sess.get({pk: session.data().user.id}, function(){
       console.log("my database session: " + JSON.stringify(s));  
       console.log("my scope session: " + JSON.stringify($scope.session));
       console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
-  });*/
+  });
 
   // start a hash for search info in session, if it doesn''t exist yet
   if( ! session.data().search ) {
