@@ -524,12 +524,16 @@ app.run(
  */
 
 app.factory('Session', ['$resource', function($resource) {
+	return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});  
+}]);
 
-	return $resource('/crud/sessioninfo/', {pk:'@pk'});  
-    }]);
+app.factory('Session_pid', ['$resource', function($resource) {
+        return function(url) {
+	    return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
+        };
+}]);
 
-
-app.factory('session', function($state, $cookieStore, Session) {
+app.factory('session', function($state, $cookieStore, Session, Session_pid) {
 
   // TODO: refactor to store session data in db on server instead of
   // in the cookieStore service. Because 1) cookies store has a max of
@@ -551,8 +555,7 @@ app.factory('session', function($state, $cookieStore, Session) {
     },
     'save' : function() {
       // store to DB instead !
-      // $cookieStore.put(cid, data);
-
+      $cookieStore.put(cid, data);
     },
     'data' : function() {
       
@@ -693,20 +696,35 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, 
-					    Session, session, workLog) {
+app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
+					    Session, Session_pid, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
-  $scope.models = Session.query(); // array
+  //$scope.models = Session.query(); // array
   
-
   // Getting the current Session object
-//  var session_object = Session.get({pioneer_id: session.data().pioneerId, notes: session.data().notes});
-  var sess = Session.get({id:1})[0].notes;
+  var foo = Session.get({pioneer_id: "00"}, function(){
+//      console.log("my database session object: " + JSON.stringify(foo));
+      console.log("my database session object(s): " + foo);
+  });
+  var sess = $resource('crud/sessioninfo/', {"pk": "@pk"});
+  var test = new Session_pid('crud/sessioninfo_pid/' + session.data().user.pioneerId).query(function(data){
+	console.log("test get stuff: " + JSON.stringify(data));
+  });
+//  console.log("test import pid: " + JSON.stringify(test));
 
-  console.log("session: " + session);
-  console.log("Session model: " + sess);  
+  var f = sess.get({pioneer_id: "hokay"}, function(){
+      console.log("my database session: " + JSON.stringify(f));
+      console.log("my scope session: " + JSON.stringify(session.data().user.pioneerId));
+      console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
+  });
+
+  var s = sess.get({pk: 5}, function(){
+      console.log("my database session: " + JSON.stringify(s));  
+      console.log("my scope session: " + JSON.stringify(session.data().user.pioneerId));
+      console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
+  });
 
   // start a hash for search info in session, if it doesn''t exist yet
   if( ! session.data().search ) {

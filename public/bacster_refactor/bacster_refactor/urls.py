@@ -12,4 +12,6 @@ urlpatterns = patterns('',
     url(r'^$', include('bacster.urls')),
     url(r'^crud/sessioninfo$', sessionCRUDView.as_view(), name='my_crud_view'),
     url(r'^crud/sessioninfo/(?P<pk>\d+)$', sessionCRUDView.as_view(), name='my_crud_view_param'),
+#    url(r'^crud/sessioninfo/pioneer$', views.multiobject, name='pid_my_crud_view_param'),
+    url(r'^crud/sessioninfo_pid/(?P<pioneer_id>\d+)$', views.multiobject, name='pid_my_crud_view_param'),
 )

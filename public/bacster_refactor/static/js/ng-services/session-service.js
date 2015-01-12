@@ -4,10 +4,16 @@
  */
 
 app.factory('Session', ['$resource', function($resource) {
-	return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:false}});  
+	return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});  
 }]);
 
-app.factory('session', function($state, $cookieStore, Session) {
+app.factory('Session_pid', ['$resource', function($resource) {
+        return function(url) {
+	    return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
+        };
+}]);
+
+app.factory('session', function($state, $cookieStore, Session, Session_pid) {
 
   // TODO: refactor to store session data in db on server instead of
   // in the cookieStore service. Because 1) cookies store has a max of

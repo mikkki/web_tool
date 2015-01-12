@@ -2,7 +2,9 @@ from django.shortcuts import render
 import MySQLdb
 from django.db import models
 from djangular.views.crud import NgCRUDView
+#from django.views.decorators.csrf import ensure_csrf_cookie
 
+#@ensure_csrf_cookie
 
 class Session(models.Model):
         pioneer_id = models.CharField(max_length=50)
@@ -37,6 +39,7 @@ class BacSession(models.Model):
 
 class sessionCRUDView(NgCRUDView):
 	model = Session
+	slug_field = 'pioneer_id'
 	
 class mysessionCRUDView(NgCRUDView):
 	model = Session
