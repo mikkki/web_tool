@@ -25,8 +25,10 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
   // callback to start a new session
   $scope.startSession = function() {
 
-    // TODO: user input validation
-    
+    //user input validation
+    $scope.user.pioneerId = $scope.user.pioneerId.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
+    $scope.user.notes     = $scope.user.notes.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
+
     session.data().user = {
       id: '', 
       pioneerId : $scope.user.pioneerId,
@@ -40,7 +42,7 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
       //storing the database session id in the cookie session:
       session.data().user.id = $scope.models.push(new_session);
       session.save();
-      console.log("session ID:  " + JSON.stringify(session.data().user.id));
+      console.log("session ID:  " + JSON.stringify(session.data().user.pioneerId));
     }); // In callback we push our new object to the models array
 
 
