@@ -49,6 +49,19 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       $scope.data.organismSource = { 'type' : 'json', 'data' : o };
   });
 
+  //calls blast on server side EDIT this later target does nothing, nav.search
+  $scope.BlastTargets = function(target){
+    console.log("my target is: " + target);
+    var blast = $resource('crud/blast_targets', {}, {'query':  {method:'GET', isArray:false}});
+    var json_results = blast.query({}, function(){
+      for (var key in json_results){
+        if (json_results.hasOwnProperty(key) && json_results[key].best_hit){
+          console.log("blast is :" + JSON.stringify(json_results) + "\t" + key + "\t" + JSON.stringify(json_results[key].best_hit));
+        }
+      }
+    });
+  }
+
   // lookup tables for reference genome data and available BAC libraries
   // TODO: convert to ajax calls to server
   var genomeReferences = {

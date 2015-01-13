@@ -86,6 +86,14 @@
 	  <span class="k-icon k-i-plus"></span>
 	  Add genome coordinates target
 	</button>
+     <!-- TEST -->
+        <button type="button"
+                class="k-button k-primary"
+                ng-show="allowSearchTarget('coordinates')"
+                ng-click="BlastTargets('test')">
+          Test Search
+        </button>
+     <!-- TEST -->
       </div>
       <div ng-if="data.searchTargetMode == 'fasta'">
 	Add FASTA target

@@ -14,6 +14,8 @@ from django.forms.models import modelform_factory
 from django.views.generic import FormView
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+from run_blast import blast_targets
+
 @ensure_csrf_cookie
 
 def index(request, template_name):
@@ -44,3 +46,6 @@ def bacsession(request, session_id):
             for row in cursor.fetchall()
           ]
     return HttpResponse(json.dumps(all), content_type="application/json")
+
+def blast(request):
+    return HttpResponse(blast_targets(), content_type="application/json")
