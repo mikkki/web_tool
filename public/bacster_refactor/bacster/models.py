@@ -41,6 +41,9 @@ class sessionCRUDView(NgCRUDView):
 	model = Session
 	slug_field = 'pioneer_id'
 	
-class mysessionCRUDView(NgCRUDView):
-	model = Session
+class organismCRUDView(NgCRUDView):
+        model = Organism
+	slug_field = 'label'
+
+
 # Create your models here.

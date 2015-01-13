@@ -4,7 +4,7 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, Session_pid, session, workLog) {
+					    Session, Session_pid, Organism, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
@@ -42,14 +42,12 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   /*
    * organisms 
    */
-  // the available organisms todo: convert to ajax call to server
-  var organisms =  [{
-    'commonName' : 'Corn (zea mays)',
-    'id' : 'zeama'
-  }, {
-    'commonName' : 'Soybean (glycine max)',
-    'id' : 'glyma'
-  }];
+
+  // the available organisms loaded from the database:
+  $scope.data.organismSource = {};
+  var o = Organism.query({}, function(){
+      $scope.data.organismSource = { 'type' : 'json', 'data' : o };
+  });
 
   // lookup tables for reference genome data and available BAC libraries
   // TODO: convert to ajax calls to server
@@ -75,7 +73,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   };
 
   // widget configuration for drop-down-list
-  $scope.data.organismSource = { 'type' : 'json', 'data' : organisms };
+  //$scope.data.organismSource = { 'type' : 'json', 'data' : organisms };
   
   // callback for user selected an organism
   $scope.onOrganism = function(taintedOrganism, dontPersist) {
@@ -218,6 +216,19 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
    // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
+
+    /*
+    var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
+      new_session.$save(function(){
+      //storing the database session id in the cookie session:
+      session.data().user.id = $scope.models.push(new_session);
+      session.save();
+      console.log("session ID:  " + JSON.stringify(session.data().user.pioneerId));
+    }); */
+
+
+
+    /*
     if(! session.data().search.targets) {
       session.data().search.targets = [];
     }
@@ -226,7 +237,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       'search type' : 'fasta'
     });
     $scope.session.save();
+    */
     $scope.onSetSearchTargetMode(null);    
+
   };
   
   // restore the user's selection for organism

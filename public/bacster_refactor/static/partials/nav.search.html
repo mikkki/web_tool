@@ -30,8 +30,8 @@
 	<label>Organism
 	  <select kendo-drop-down-list
 		  k-data-source="data.organismSource"
-		  k-data-text-field="'commonName'"
-		  k-data-value-field="'id'"
+		  k-data-text-field="'label'"
+		  k-data-value-field="'pk'"
 		  ng-model="data.organism"
 		  ng-change="onOrganism(data.organism)">
 	  </select>
