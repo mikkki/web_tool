@@ -524,16 +524,16 @@ app.run(
  */
 
 app.factory('Session', ['$resource', function($resource) {
-	return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:false}});  
+	return $resource('crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});  
 }]);
 
 app.factory('Session_pid', ['$resource', function($resource) {
         return function(url) {
-	    return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
+            return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
         };
 }]);
 
-app.factory('session', function($state, $cookieStore, Session, Session_pid) {
+app.factory('session', function($state, $cookieStore, Session) {
 
   // TODO: refactor to store session data in db on server instead of
   // in the cookieStore service. Because 1) cookies store has a max of
@@ -632,33 +632,16 @@ app.controller('navController', function($scope, $state, session) {
  *
  * Enable user interaction on the nav.session ui state.
  */
-app.controller('sessionController_new', ['$scope', 'Session', function($scope, Session) {
-    //Query returns an array of objects, MyModel.objects.all() by default
-    $scope.models = Session.query();
-    // a model for data binding
-    $scope.user = {
-      pioneerId : '',
-      notes : ''
-    };
-
-  // callback to start a new session
-    $scope.startSession = function() {
-      var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
-      new_session.$save(function(){
-	  $scope.models.push(new_session);
-      }); // In callback we push our new object to the models array
-
-      $state.go('nav.home');
-  };
-}]);
 
 app.controller('sessionController', ['$scope', 'Session', '$state', 'session', function($scope, Session, $state, session) {
 
   //Query returns an array of objects, MyModel.objects.all() by default
   $scope.models = Session.query();
-
+  //  console.log("models:  " + JSON.stringify($scope.models));
+  
   // a model for data binding
   $scope.user = {
+    id : '',
     pioneerId : '',
     notes : ''
   };
@@ -674,6 +657,7 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
     // TODO: user input validation
     
     session.data().user = {
+      id: '', 
       pioneerId : $scope.user.pioneerId,
       notes : $scope.user.notes,
       timestamp : new Date().toLocaleDateString("en-US")
@@ -682,9 +666,13 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
 
     var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
     new_session.$save(function(){
-	$scope.models.push(new_session);
+      //storing the database session id in the cookie session:
+      session.data().user.id = $scope.models.push(new_session);
+      session.save();
+      console.log("session ID:  " + JSON.stringify(session.data().user.id));
     }); // In callback we push our new object to the models array
-  
+
+
     // use the ui-router service to redirect user to home now that a
     // session is established
     $state.go('nav.home');
@@ -704,25 +692,16 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   //$scope.models = Session.query(); // array
   
   // Getting the current Session object
-  var foo = Session.get({pioneer_id: "00"}, function(){
-//      console.log("my database session object: " + JSON.stringify(foo));
-      console.log("my database session object(s): " + foo);
+  var test = new Session_pid('crud/sessioninfo_pid/' + session.data().user.pioneerId).query(function(data){
+        console.log("test get stuff: " + JSON.stringify(data));
   });
   var sess = $resource('crud/sessioninfo/', {"pk": "@pk"});
-  var test = new Session_pid('crud/sessioninfo_pid/' + session.data().user.pioneerId).query(function(data){
-	console.log("test get stuff: " + JSON.stringify(data));
-  });
-//  console.log("test import pid: " + JSON.stringify(test));
+   
+  console.log("my session.user.id: " + JSON.stringify(session.data().user.id));
 
-  var f = sess.get({pioneer_id: "hokay"}, function(){
-      console.log("my database session: " + JSON.stringify(f));
-      console.log("my scope session: " + JSON.stringify(session.data().user.pioneerId));
-      console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
-  });
-
-  var s = sess.get({pk: 5}, function(){
+  var s = sess.get({pk: session.data().user.id}, function(){
       console.log("my database session: " + JSON.stringify(s));  
-      console.log("my scope session: " + JSON.stringify(session.data().user.pioneerId));
+      console.log("my scope session: " + JSON.stringify($scope.session));
       console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
   });
 

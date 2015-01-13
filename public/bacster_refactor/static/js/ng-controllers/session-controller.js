@@ -8,7 +8,8 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
 
   //Query returns an array of objects, MyModel.objects.all() by default
   $scope.models = Session.query();
-
+  //  console.log("models:  " + JSON.stringify($scope.models));
+  
   // a model for data binding
   $scope.user = {
     id : '',

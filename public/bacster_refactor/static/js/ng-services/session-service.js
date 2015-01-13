@@ -4,8 +4,13 @@
  */
 
 app.factory('Session', ['$resource', function($resource) {
-  //if isArray is set to false no new session can be created:
-  return $resource('/crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});  
+	return $resource('crud/sessioninfo', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});  
+}]);
+
+app.factory('Session_pid', ['$resource', function($resource) {
+        return function(url) {
+            return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
+        };
 }]);
 
 app.factory('session', function($state, $cookieStore, Session) {

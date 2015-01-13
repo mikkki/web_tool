@@ -4,13 +4,16 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, session, workLog) {
+					    Session, Session_pid, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
   //$scope.models = Session.query(); // array
   
   // Getting the current Session object
+  var test = new Session_pid('crud/sessioninfo_pid/' + session.data().user.pioneerId).query(function(data){
+        console.log("test get stuff: " + JSON.stringify(data));
+  });
   var sess = $resource('crud/sessioninfo/', {"pk": "@pk"});
    
   console.log("my session.user.id: " + JSON.stringify(session.data().user.id));
