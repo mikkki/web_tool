@@ -4,7 +4,7 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, Session_pid, Organism, session, workLog) {
+					    Session, Session_pid, Organism, Genome, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
@@ -49,6 +49,17 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       $scope.data.organismSource = { 'type' : 'json', 'data' : o };
   });
 
+  /*
+   * genomes
+   */
+
+  var genomeReferences = {};
+  var g = Genome.query({}, function(){
+      angular.forEach(g, function(genome, key) {
+          this[genome.organism] = [{ 'genomeName' : genome.label, 'id' : genome.pk}];
+      }, genomeReferences);
+  });
+
   //calls blast on server side EDIT this later target does nothing, nav.search
   $scope.BlastTargets = function(target){
     console.log("my target is: " + target);
@@ -62,18 +73,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     });
   }
 
-  // lookup tables for reference genome data and available BAC libraries
-  // TODO: convert to ajax calls to server
-  var genomeReferences = {
-    'zeama' : [{
-      'genomeName' : 'ZmChr0v2',
-      'id' : 'ZmChr0v2'
-    }],
-    'glyma' :[{
-      'genomeName' : 'Gmax_275_Wm82.a2.v1',
-      'id' : 'Gmax_275_Wm82.a2.v1'
-    }]
-  };
   var dbsDatasets = {
     'ZmChr0v2' :  [{
       'name' : 'HC69.BACs',

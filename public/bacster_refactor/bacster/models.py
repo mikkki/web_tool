@@ -45,5 +45,8 @@ class organismCRUDView(NgCRUDView):
         model = Organism
 	slug_field = 'label'
 
+class genomeCRUDView(NgCRUDView):
+        model = Genome
+        slug_field = 'label'
 
 # Create your models here.
