@@ -2,6 +2,21 @@
  * session service. the purpose of this service is persistence of
  * session data, in a manner accessable by any angular contoller.
  */
+app.factory('Bacsession', ['$resource', function($resource) {
+        return $resource('crud/bacsession', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
+app.factory('Bac', ['$resource', function($resource) {
+        return $resource('crud/bac', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
+app.factory('Targettype', ['$resource', function($resource) {
+        return $resource('crud/targettype', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
+app.factory('Target', ['$resource', function($resource) {
+        return $resource('crud/target', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+}]);
 
 app.factory('Bacset', ['$resource', function($resource) {
         return $resource('crud/bacset', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});

@@ -4,25 +4,28 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, Session_pid, Organism, Genome, Bacset, session, workLog) {
+					    Session, Session_pid, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, session, workLog) {
 
-  // make session available in the view''s scope
-  $scope.session = session;
-  //$scope.models = Session.query(); // array
-  
+  /******** TESTING BOF **********/
   // Getting the current Session object
   var test = new Session_pid('crud/sessioninfo_pid/' + session.data().user.pioneerId).query(function(data){
-        console.log("test get stuff: " + JSON.stringify(data));
+        //console.log("test get stuff: " + JSON.stringify(data));
   });
+
   var sess = $resource('crud/sessioninfo/', {"pk": "@pk"});
    
   console.log("my session.user.id: " + JSON.stringify(session.data().user.id));
 
   var s = sess.get({pk: session.data().user.id}, function(){
-      console.log("my database session: " + JSON.stringify(s));  
-      console.log("my scope session: " + JSON.stringify($scope.session));
-      console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
+      //console.log("my database session: " + JSON.stringify(s));  
+      //console.log("my scope session: " + JSON.stringify($scope.session));
+      //console.log("cookie store: " + JSON.stringify($cookieStore.get('bacster-session')));
   });
+  /******** TESTING EOF**********/
+
+
+  // make session available in the view''s scope
+  $scope.session = session;
 
   // start a hash for search info in session, if it doesn''t exist yet
   if( ! session.data().search ) {
@@ -240,17 +243,27 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
 
-    /*
-    var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
-      new_session.$save(function(){
-      //storing the database session id in the cookie session:
-      session.data().user.id = $scope.models.push(new_session);
-      session.save();
-      console.log("session ID:  " + JSON.stringify(session.data().user.pioneerId));
-    }); */
+    //var organism = $scope.data.organism;
+    //var genome   = $scope.data.genome;
+    var dbs      = $scope.data.dbs;
+    var searchmode = $scope.data.searchTargetMode;
 
-
-
+    var tt = Targettype.get({label: searchmode}, function(){
+      tt_id = tt.pk;
+      //new record in bacster_target:
+      var new_target = new Target({seq: fasta, coords: "-", targettype: tt_id});
+      new_target.$save(function(){
+        //new record in bacster_bac:
+        var new_bac = new Bac({bacset: dbs, target: new_target.pk});
+        new_bac.$save(function(){
+          //new record in bacster_bacsession:
+          var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
+          new_bacsession.$save(function(){
+          });
+        });
+      });
+    });
+ 
     
     if(! session.data().search.targets) {
       session.data().search.targets = [];
@@ -261,6 +274,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     });
     $scope.session.save();
     
+    //this stays:
     $scope.onSetSearchTargetMode(null);    
 
   };

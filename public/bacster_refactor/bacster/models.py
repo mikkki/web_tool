@@ -52,4 +52,18 @@ class genomeCRUDView(NgCRUDView):
 class bacsetCRUDView(NgCRUDView):
 	model = BacSet
 	slug_field = 'label'
+
+class targettypeCRUDView(NgCRUDView): 
+        model = TargetType
+        slug_field = 'label' 
+
+class targetCRUDView(NgCRUDView):
+	model = Target
+
+class bacCRUDView(NgCRUDView):
+	model = Bac
+
+class bacsessionCRUDView(NgCRUDView):
+	model = BacSession
+
 # Create your models here.

@@ -40,8 +40,8 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
     var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
     new_session.$save(function(){
       //storing the database session id in the cookie session:
-      session.data().user.id = $scope.models.push(new_session);
-      session.save();
+      session.data().user.id = new_session.pk;
+      $scope.models.push(new_session);
       console.log("session ID:  " + JSON.stringify(session.data().user.pioneerId));
     }); // In callback we push our new object to the models array
 
