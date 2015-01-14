@@ -4,7 +4,7 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, Session_pid, Organism, Genome, session, workLog) {
+					    Session, Session_pid, Organism, Genome, Bacset, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
@@ -56,8 +56,29 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   var genomeReferences = {};
   var g = Genome.query({}, function(){
       angular.forEach(g, function(genome, key) {
-          this[genome.organism] = [{ 'genomeName' : genome.label, 'id' : genome.pk}];
+          if (this[genome.organism]) {
+              this[genome.organism].push({ 'genomeName' : genome.label, 'id' : genome.pk});
+          } else {
+              this[genome.organism] = [{ 'genomeName' : genome.label, 'id' : genome.pk}];
+          }
       }, genomeReferences);
+  });
+
+
+  /*
+   * DbS datasets
+   */
+
+  var dbsDatasets = {};
+  var bs = Bacset.query({}, function(){
+      angular.forEach(bs, function(bacset, key) {
+          //this refers to a dbsDatasets elem
+          if (this[bacset.genome]) {
+            this[bacset.genome].push({ 'name' : bacset.label, 'id' : bacset.pk});
+  	  } else {
+	    this[bacset.genome] = [{ 'name' : bacset.label, 'id' : bacset.pk}];  
+          }
+      }, dbsDatasets);
   });
 
   //calls blast on server side EDIT this later target does nothing, nav.search
@@ -73,16 +94,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     });
   }
 
-  var dbsDatasets = {
-    'ZmChr0v2' :  [{
-      'name' : 'HC69.BACs',
-      'id' : 'HC69.BACs'
-    }, {
-      'name' : 'HG11.BACs',
-      'id' : 'HG11.BACs'
-    }],
-    'Gmax_275_Wm82.a2.v1' : []
-  };
 
   // widget configuration for drop-down-list
   //$scope.data.organismSource = { 'type' : 'json', 'data' : organisms };

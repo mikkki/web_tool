@@ -3,6 +3,10 @@
  * session data, in a manner accessable by any angular contoller.
  */
 
+app.factory('Bacset', ['$resource', function($resource) {
+        return $resource('crud/bacset', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
 app.factory('Genome', ['$resource', function($resource) {
         return $resource('crud/genome', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
 }]);
