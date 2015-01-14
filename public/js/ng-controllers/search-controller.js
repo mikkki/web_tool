@@ -251,7 +251,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
 
 
-    /*
+    
     if(! session.data().search.targets) {
       session.data().search.targets = [];
     }
@@ -260,7 +260,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       'search type' : 'fasta'
     });
     $scope.session.save();
-    */
+    
     $scope.onSetSearchTargetMode(null);    
 
   };
