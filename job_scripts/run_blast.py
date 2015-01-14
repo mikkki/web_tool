@@ -21,7 +21,7 @@ def blast_targets():
 #output    = "blastresults.tab"
 #cmd       = blast_cmd + " -db " + database + " -query " + query + " -out " + output + " -outfmt '7 std qlen slen'" 
     cmd       = blast_cmd + " -db " + database + " -query " + query + " -outfmt '7 std qlen slen'" 
-    json_results = {}
+    json_results = []
     check = re.compile('^#|^\s*$|^{}$')
 
     #c = subprocess.call(shlex.split(cmd), shell=False, stdout=subprocess.PIPE)
