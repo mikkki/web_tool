@@ -227,8 +227,39 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     session.save();
   };
   
+
+  function save_target(target) {
+      var dbs      = $scope.data.dbs;
+      var searchmode = $scope.data.searchTargetMode;
+
+      var tt = Targettype.get({label: searchmode}, function(){
+	  tt_id = tt.pk;
+          //new record in bacster_target:
+	  var new_target;
+          if (searchmode == 'fasta') {
+              new_target = new Target({seq: target, coords: "-", targettype: tt_id});
+	  } else {
+	      new_target = new Target({seq: "-", coords: target, targettype: tt_id});
+          }
+	  new_target.$save(function(){
+              //new record in bacster_bac:
+	      var new_bac = new Bac({bacset: dbs, target: new_target.pk});
+              new_bac.$save(function(){
+                  //new record in bacster_bacsession:
+                  var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
+                  new_bacsession.$save(function(){
+                  });
+              });
+          });
+      });
+  }
+
   // callback for add coordinates search target
   $scope.onAddCoordsData = function(coordinates) {
+
+    save_target(coordinates);
+
+    // this needs to go:
     if(! session.data().search.targets) {
       session.data().search.targets = [];
     }
@@ -237,34 +268,20 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       'search type' : 'coordinates'
     });
     $scope.session.save();    
+
+    // this stays:
     $scope.onSetSearchTargetMode(null);
   };
 
    // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
 
+    save_target(fasta);
+
     //var organism = $scope.data.organism;
     //var genome   = $scope.data.genome;
-    var dbs      = $scope.data.dbs;
-    var searchmode = $scope.data.searchTargetMode;
-
-    var tt = Targettype.get({label: searchmode}, function(){
-      tt_id = tt.pk;
-      //new record in bacster_target:
-      var new_target = new Target({seq: fasta, coords: "-", targettype: tt_id});
-      new_target.$save(function(){
-        //new record in bacster_bac:
-        var new_bac = new Bac({bacset: dbs, target: new_target.pk});
-        new_bac.$save(function(){
-          //new record in bacster_bacsession:
-          var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
-          new_bacsession.$save(function(){
-          });
-        });
-      });
-    });
  
-    
+    // this needs to go:
     if(! session.data().search.targets) {
       session.data().search.targets = [];
     }
