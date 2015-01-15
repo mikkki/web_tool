@@ -4,7 +4,7 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
-					    Session, Session_pid, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, session, workLog) {
+					    Session, Session_pid, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
   /******** TESTING BOF **********/
   // Getting the current Session object
@@ -36,11 +36,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   if(! $scope.data) {
     $scope.data = {};
   }
-
-  $scope.data.gridOptions = {
-    data: 'session.data().search.targets',
-    plugins: [new ngGridFlexibleHeightPlugin()]
-  };
   
   /*
    * organisms 
@@ -83,6 +78,45 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           }
       }, dbsDatasets);
   });
+
+   /*
+   * data options
+   */
+
+  $scope.data.gridOptions = {
+    data: 'session.data().search.targets',
+    plugins: [new ngGridFlexibleHeightPlugin()]
+  };
+
+  //$scope.session.data().search.targets.push( {
+  //'target' : coordinates,
+  //'search type' : 'coordinates'
+  //});
+
+
+   var all_targets = [];   
+   //var gett = new Get_targets('crud/session_targets/' + session.data().user.id+'/'+session.data().search.organism+'/'+session.data().search.genome+'/'+session.data().search.dbs).query(function(data){
+   var gettar = new Get_targets('crud/session_targets/' + session.data().user.id+'/1/1/1').query(function(data){  
+
+        angular.forEach(data, function(val, key) { 
+   	      console.log("val.label " + val.label );
+              if (val.label == "fasta") {
+                  this.push({ 'target' : val.seq, 'search type' : val.label});
+                  
+              } else {
+		  this.push({ 'target' : val.coords, 'search type' : val.label});
+              }
+        }, all_targets);
+        console.log(" get database targets - 1 : " + JSON.stringify(all_targets));
+
+   });
+   
+   //$scope.data.gridOptions.data = all_targets;
+   console.log(" get database targets - 2 : " + JSON.stringify(all_targets));
+   console.log(" get session  targets : " + JSON.stringify(session.data().search.targets));
+
+
+
 
   //calls blast on server side EDIT this later target does nothing, nav.search
   $scope.BlastTargets = function(target){

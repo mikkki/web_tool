@@ -37,9 +37,9 @@ def multiobject(request, pioneer_id):
     return HttpResponse(json.dumps(all), content_type="application/json")
 
 
-def bacsession(request, session_id):
+def session_targets(request, session_id, organism_id, genome_id, bacset_id):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM bacster_organism, bacster_genome, bacster_bacset, bacster_targettype, bacster_target, bacster_bac, bacster_bacsession where bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_target.targettype_id = bacster_targettype.id and bacster_bacset.genome_id = bacster_genome.id and bacster_genome.organism_id = bacster_organism.id and bacster_bacsession.session_id =%s", [session_id])
+    cursor.execute("SELECT * FROM bacster_organism, bacster_genome, bacster_bacset, bacster_targettype, bacster_target, bacster_bac, bacster_bacsession where bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_target.targettype_id = bacster_targettype.id and bacster_bacset.genome_id = bacster_genome.id and bacster_genome.organism_id = bacster_organism.id and bacster_bacsession.session_id =%s and bacster_organism.id=%s and bacster_genome.id=%s and bacster_bacset.id=%s  ", [session_id, organism_id, genome_id, bacset_id])
     desc = cursor.description
     all = [
             dict(zip([col[0] for col in desc], row))
