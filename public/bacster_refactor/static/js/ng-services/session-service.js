@@ -4,9 +4,7 @@
  */
 
 app.factory('Get_targets', ['$resource', function($resource) {
-        return function(url) {
-            return $resource(url, {}, {'query':  {method:'GET', isArray:true}});
-        };
+        return $resource('crud/session_targets/:session/:organism/:genome/:bacset', {"session": "@session", "organism": "@organism", "genome": "@genome", "bacset": "@bacset"}, {'query':  {method:'GET', isArray:true}});
 }]);
 
 app.factory('Bacsession', ['$resource', function($resource) {

@@ -36,7 +36,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   if(! $scope.data) {
     $scope.data = {};
   }
-  
+ 
   /*
    * organisms 
    */
@@ -46,7 +46,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   var o = Organism.query({}, function(){
       $scope.data.organismSource = { 'type' : 'json', 'data' : o };
   });
-
+  console.log("scope.data.organismSource: " + JSON.stringify($scope.data.organismSource));
   /*
    * genomes
    */
@@ -61,7 +61,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           }
       }, genomeReferences);
   });
-
+  console.log("genomeReferences:  "+ JSON.stringify(genomeReferences));
 
   /*
    * DbS datasets
@@ -80,41 +80,32 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   });
 
    /*
-   * data options
+    * data options
    */
 
-  $scope.data.gridOptions = {
-    data: 'session.data().search.targets',
-    plugins: [new ngGridFlexibleHeightPlugin()]
-  };
-
-  //$scope.session.data().search.targets.push( {
-  //'target' : coordinates,
-  //'search type' : 'coordinates'
-  //});
-
-
-   var all_targets = [];   
    //var gett = new Get_targets('crud/session_targets/' + session.data().user.id+'/'+session.data().search.organism+'/'+session.data().search.genome+'/'+session.data().search.dbs).query(function(data){
-   var gettar = new Get_targets('crud/session_targets/' + session.data().user.id+'/1/1/1').query(function(data){  
 
-        angular.forEach(data, function(val, key) { 
-   	      console.log("val.label " + val.label );
-              if (val.label == "fasta") {
-                  this.push({ 'target' : val.seq, 'search type' : val.label});
-                  
-              } else {
-		  this.push({ 'target' : val.coords, 'search type' : val.label});
-              }
-        }, all_targets);
-        console.log(" get database targets - 1 : " + JSON.stringify(all_targets));
+   var all_targets = [];        
 
+   var gettar = new Get_targets.query({session: session.data().user.id, organism: 1, genome: 1, bacset: 1},function(gettar){  
+
+         angular.forEach(gettar, function(val, key) { 	
+             if (val.label == "fasta") {
+               this.push({ 'target' : val.seq, 'search type' : val.label});                 
+             } else {
+  	       this.push({ 'target' : val.coords, 'search type' : val.label});
+             }
+         }, all_targets);
+         $scope.myData = all_targets;
    });
-   
-   //$scope.data.gridOptions.data = all_targets;
-   console.log(" get database targets - 2 : " + JSON.stringify(all_targets));
+
+   //get rid of session.data().search.targets !!!!
    console.log(" get session  targets : " + JSON.stringify(session.data().search.targets));
 
+   $scope.data.gridOptions = {
+     data: 'myData',
+     plugins: [new ngGridFlexibleHeightPlugin()]
+   };
 
 
 
