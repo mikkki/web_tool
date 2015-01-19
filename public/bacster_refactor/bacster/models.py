@@ -39,7 +39,7 @@ class BacSession(models.Model):
 
 class sessionCRUDView(NgCRUDView):
 	model = Session
-	slug_field = 'pioneer_id'
+	slug_field = 'pioneer_id' #not unique!! cannot be used as slug_field
 	
 class organismCRUDView(NgCRUDView):
         model = Organism
@@ -65,5 +65,6 @@ class bacCRUDView(NgCRUDView):
 
 class bacsessionCRUDView(NgCRUDView):
 	model = BacSession
+
 
 # Create your models here.

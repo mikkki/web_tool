@@ -4,7 +4,8 @@
  */
 
 app.factory('Get_targets', ['$resource', function($resource) {
-        return $resource('crud/session_targets/:session/:organism/:genome/:bacset', {"session": "@session", "organism": "@organism", "genome": "@genome", "bacset": "@bacset"}, {'query':  {method:'GET', isArray:true}});
+        //return $resource('crud/session_targets/:session/:organism/:genome/:bacset', {"session": "@session", "organism": "@organism", "genome": "@genome", "bacset": "@bacset"}, {'query':  {method:'GET', isArray:true}});
+	return $resource('crud/session_targets/:session', {"session": "@session"}, {'query':  {method:'GET', isArray:true}});
 }]);
 
 app.factory('Bacsession', ['$resource', function($resource) {
@@ -20,7 +21,7 @@ app.factory('Targettype', ['$resource', function($resource) {
 }]);
 
 app.factory('Target', ['$resource', function($resource) {
-        return $resource('crud/target', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}});
+        return $resource('crud/target', {"pk": "@pk"}, {'query':  {method:'GET', isArray:true}, 'remove': {method:'DELETE'}, 'delete': {method:'DELETE'} });
 }]);
 
 app.factory('Bacset', ['$resource', function($resource) {

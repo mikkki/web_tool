@@ -3,7 +3,7 @@
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore,
+app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window,
 					    Session, Session_pid, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
   /******** TESTING BOF **********/
@@ -79,17 +79,16 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       }, dbsDatasets);
   });
 
-   /*
-    * data options
-   */
+  /*
+   * data options
+  */
 
-   //var gett = new Get_targets('crud/session_targets/' + session.data().user.id+'/'+session.data().search.organism+'/'+session.data().search.genome+'/'+session.data().search.dbs).query(function(data){
-
-   var all_targets = [];        
-
-   var gettar = new Get_targets.query({session: session.data().user.id, organism: 1, genome: 1, bacset: 1},function(gettar){  
-
+  function set_targets() {
+      var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){  
+         var all_targets = [];        
          angular.forEach(gettar, function(val, key) { 	
+             session.data().search.targettype = val.label;
+	     session.save();
              if (val.label == "fasta") {
                this.push({ 'target' : val.seq, 'search type' : val.label});                 
              } else {
@@ -97,17 +96,18 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
              }
          }, all_targets);
          $scope.myData = all_targets;
-   });
+      });
+      //get rid of session.data().search.targets !!!!
+      console.log(" get session  targets : " + JSON.stringify(session.data().search.targets));
+      
+      //set the target type!!
+      $scope.data.gridOptions = {
+        data: 'myData',
+        plugins: [new ngGridFlexibleHeightPlugin()]
+      };
+  };
 
-   //get rid of session.data().search.targets !!!!
-   console.log(" get session  targets : " + JSON.stringify(session.data().search.targets));
-
-   $scope.data.gridOptions = {
-     data: 'myData',
-     plugins: [new ngGridFlexibleHeightPlugin()]
-   };
-
-
+  set_targets();
 
   //calls blast on server side EDIT this later target does nothing, nav.search
   $scope.BlastTargets = function(target){
@@ -137,8 +137,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     if(organism != session.data().search.organism) {
        // other search inputs are now invalidated
        session.data().search = {};
+       //$scope.data.gridOptions.data = '';
     }
-    
+
     var useReferences = genomeReferences[organism];
     
     $scope.data.genomeSource  = { 'type' : 'json', 'data' : useReferences };
@@ -225,11 +226,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
   $scope.allowSearchTarget = function(targetType) {
-    var targets = session.data().search.targets;
-    if( ! targets || targets.length == 0 ) {
+    var type = session.data().search.targettype;
+    if( ! type) {
       return true; // allow either type of serch
     }
-    return targets[0]['search type'] == targetType;
+    return type == targetType;
   };
 
   // callback for fasta example data button
@@ -245,20 +246,43 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
  
   // callback for clearing list of search targets
   $scope.onClearTargets = function() {
-    $scope.data.addFasta = null;
-    $scope.data.addCoords = null;
+    var clear = $window.confirm('Are you absolutely sure you want to clear the targets?');   
+
+    if (clear) {
+        $scope.data.addFasta = null;
+        $scope.data.addCoords = null;
+        session.data().search.targettype = '';
+
+        var bacsess = $resource('crud/bacsessions/:session', {session: session.data().user.id}).query({}, function(bacsess_data){
+
+	    angular.forEach(bacsess_data, function(bacsession, key) {
+                var target_id = bacsession.target_id
+   	        var target = new Target({pk: target_id});
+		//delete target records (all corresponding records in bac and bacsession will be deleted too):
+		target.$remove();
+
+	    });
+
+	});
+
+     }
+
+    $scope.data.gridOptions = {
+      data: '',
+      plugins: [new ngGridFlexibleHeightPlugin()]
+    };
+    // delete targets from db (this code should go!):
+      session.data().search.targets = [];
+      session.save();
+   };
     
-    session.data().search.targets = [];
-    session.save();
-  };
-  
 
   function save_target(target) {
-      var dbs      = $scope.data.dbs;
+      var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
 
       var tt = Targettype.get({label: searchmode}, function(){
-	  tt_id = tt.pk;
+	  var tt_id = tt.pk;
           //new record in bacster_target:
 	  var new_target;
           if (searchmode == 'fasta') {
