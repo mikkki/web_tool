@@ -82,11 +82,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   /*
    * data options
   */
-
+  
   function set_targets() {
-      var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){  
-	 $scope.myData= [];
-         angular.forEach(gettar, function(val, key) { 	
+        var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){  
+        angular.forEach(gettar, function(val, key) { 	
              //set the target type:
              session.data().search.targettype = val.label;
              session.data().search.target_added = 1;
@@ -96,18 +95,21 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
              } else {
   	       this.push({ 'target' : val.coords, 'search type' : val.label});
              }
-         }, $scope.myData);
-
+        }, $scope.myData);
       });    
+  };
+  
 
-      $scope.data.gridOptions = {
-        data: 'myData',
-        plugins: [new ngGridFlexibleHeightPlugin()]
-      };
-      console.log("scope.data.gridOptions: " + $scope.myData);
+  if (! $scope.myData ) {
+     $scope.myData = [];   
+     set_targets();
+  }
+
+  $scope.data.gridOptions = {
+    data: 'myData',
+    plugins: [new ngGridFlexibleHeightPlugin()]
   };
 
-  set_targets();
 
   //calls blast on server side EDIT this later target does nothing, nav.search
   $scope.BlastTargets = function(target){
@@ -253,6 +255,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
         $scope.data.addCoords = null;
         session.data().search.targettype = null;
 	session.data().search.target_added = null;
+        session.save();
 
         var bacsess = $resource('crud/bacsessions/:session', {session: session.data().user.id}).query({}, function(bacsess_data){
 
@@ -265,10 +268,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	});
      }
 
-    $scope.data.gridOptions = {
-      data: '',
-      plugins: [new ngGridFlexibleHeightPlugin()]
-    };
+     $scope.data.gridOptions = {
+       data: '',
+       plugins: [new ngGridFlexibleHeightPlugin()]
+     };
 
    };
 
@@ -292,11 +295,19 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                   //new record in bacster_bacsession:
                   var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
                   new_bacsession.$save(function(){
-		      //$scope.myData.push({ 'target' : target, 'search type' : searchmode});
+ 	            if( ! $scope.myData ) {
+			$scope.myData = []
+		    }
+		    $scope.myData.push({ 'target' : target, 'search type' : searchmode});
                   });
               });
           });
       });
+
+      $scope.data.gridOptions = {
+	  data: 'myData',
+	  plugins: [new ngGridFlexibleHeightPlugin()]
+      };
   }
 
 
@@ -314,7 +325,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   $scope.onAddFastaData = function(fasta) {
 
     save_target(fasta);
-
+  
     //this stays:
     $scope.onSetSearchTargetMode(null);    
 
