@@ -29,6 +29,10 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
     $scope.user.pioneerId = $scope.user.pioneerId.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
     $scope.user.notes     = $scope.user.notes.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
 
+    if (! session.data() ) {
+	session.data() = { user: {} };
+    }
+ 
     session.data().user = {
       id: '', 
       pioneerId : $scope.user.pioneerId,

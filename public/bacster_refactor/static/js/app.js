@@ -1,7 +1,7 @@
 // instantiate angular-js web app named bacster
 
 var app = angular.module('bacster', ['ui.router', 'kendo.directives',
-				      'ngCookies', 'ngGrid', 'ngResource']);
+				      'ngCookies', 'ngGrid', 'ngResource', 'ngRoute']);
 
 app.config( function($httpProvider, $stateProvider, $urlRouterProvider) {
   /* Create url routes, and a root ui state named 'nav'. All other ui

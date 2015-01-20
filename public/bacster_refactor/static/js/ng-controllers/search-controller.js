@@ -3,7 +3,7 @@
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window,
+app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route,
 					    Session, Session_pid, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
   /******** TESTING BOF **********/
@@ -85,26 +85,26 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   function set_targets() {
       var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){  
-         var all_targets = [];        
+	 $scope.myData= [];
          angular.forEach(gettar, function(val, key) { 	
+             //set the target type:
              session.data().search.targettype = val.label;
+             session.data().search.target_added = 1;
 	     session.save();
              if (val.label == "fasta") {
                this.push({ 'target' : val.seq, 'search type' : val.label});                 
              } else {
   	       this.push({ 'target' : val.coords, 'search type' : val.label});
              }
-         }, all_targets);
-         $scope.myData = all_targets;
-      });
-      //get rid of session.data().search.targets !!!!
-      console.log(" get session  targets : " + JSON.stringify(session.data().search.targets));
-      
-      //set the target type!!
+         }, $scope.myData);
+
+      });    
+
       $scope.data.gridOptions = {
         data: 'myData',
         plugins: [new ngGridFlexibleHeightPlugin()]
       };
+      console.log("scope.data.gridOptions: " + $scope.myData);
   };
 
   set_targets();
@@ -159,9 +159,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // handle the search job & present results.
   $scope.search = function() {
 
-    if(session.data().search.targets.length == 0) {
-      $scope.data.error = 'Please add search targets';
-    }
+    //if(session.data().search.targets.length == 0) {
+    //  $scope.data.error = 'Please add search targets';
+   // }
     
     // copy current selections from select widgets, if ng-change did not fire
     // for these values
@@ -226,11 +226,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
   $scope.allowSearchTarget = function(targetType) {
-    var type = session.data().search.targettype;
-    if( ! type) {
+
+    if( (! session.data().search) || (! session.data().search.targettype)) {
       return true; // allow either type of serch
     }
-    return type == targetType;
+    return session.data().search.targettype == targetType;
   };
 
   // callback for fasta example data button
@@ -251,7 +251,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     if (clear) {
         $scope.data.addFasta = null;
         $scope.data.addCoords = null;
-        session.data().search.targettype = '';
+        session.data().search.targettype = null;
+	session.data().search.target_added = null;
 
         var bacsess = $resource('crud/bacsessions/:session', {session: session.data().user.id}).query({}, function(bacsess_data){
 
@@ -260,11 +261,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    	        var target = new Target({pk: target_id});
 		//delete target records (all corresponding records in bac and bacsession will be deleted too):
 		target.$remove();
-
 	    });
-
 	});
-
      }
 
     $scope.data.gridOptions = {
@@ -272,10 +270,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       plugins: [new ngGridFlexibleHeightPlugin()]
     };
     // delete targets from db (this code should go!):
-      session.data().search.targets = [];
-      session.save();
+    //  session.data().search.targets = [];
+    //  session.save();
    };
-    
 
   function save_target(target) {
       var dbs        = $scope.data.dbs;
@@ -297,11 +294,14 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                   //new record in bacster_bacsession:
                   var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
                   new_bacsession.$save(function(){
+		      //$scope.myData.push({ 'target' : target, 'search type' : searchmode});
                   });
               });
           });
       });
   }
+
+
 
   // callback for add coordinates search target
   $scope.onAddCoordsData = function(coordinates) {
@@ -309,14 +309,14 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     save_target(coordinates);
 
     // this needs to go:
-    if(! session.data().search.targets) {
-      session.data().search.targets = [];
-    }
-    $scope.session.data().search.targets.push( {
-      'target' : coordinates,
-      'search type' : 'coordinates'
-    });
-    $scope.session.save();    
+    //if(! session.data().search.targets) {
+    //  session.data().search.targets = [];
+    //}
+    //$scope.session.data().search.targets.push( {
+    //  'target' : coordinates,
+    //  'search type' : 'coordinates'
+    //});
+    //$scope.session.save();    
 
     // this stays:
     $scope.onSetSearchTargetMode(null);
@@ -327,19 +327,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
     save_target(fasta);
 
-    //var organism = $scope.data.organism;
-    //var genome   = $scope.data.genome;
- 
-    // this needs to go:
-    if(! session.data().search.targets) {
-      session.data().search.targets = [];
-    }
-    $scope.session.data().search.targets.push( {
-      'target' : fasta,
-      'search type' : 'fasta'
-    });
-    $scope.session.save();
-    
     //this stays:
     $scope.onSetSearchTargetMode(null);    
 
