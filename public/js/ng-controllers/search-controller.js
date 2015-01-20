@@ -29,7 +29,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // start a hash for search info in session, if it doesn''t exist yet
   if( ! session.data().search ) {
-    session.data().search = { targets : [] };
+    session.data().search = {};
   }
 
   // it is recommended for ng-model to have a "dot" e.g. $scope.data.whatever
@@ -269,9 +269,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       data: '',
       plugins: [new ngGridFlexibleHeightPlugin()]
     };
-    // delete targets from db (this code should go!):
-    //  session.data().search.targets = [];
-    //  session.save();
+
    };
 
   function save_target(target) {
@@ -307,16 +305,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   $scope.onAddCoordsData = function(coordinates) {
 
     save_target(coordinates);
-
-    // this needs to go:
-    //if(! session.data().search.targets) {
-    //  session.data().search.targets = [];
-    //}
-    //$scope.session.data().search.targets.push( {
-    //  'target' : coordinates,
-    //  'search type' : 'coordinates'
-    //});
-    //$scope.session.save();    
 
     // this stays:
     $scope.onSetSearchTargetMode(null);
