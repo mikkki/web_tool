@@ -68,5 +68,16 @@ def bacsessions(request, session_id):
               ]
         return HttpResponse(json.dumps(all), content_type="application/json")      
 
-def blast(request):
-    return HttpResponse(blast_targets(), content_type="application/json")
+def blast(request, bacsession_id):
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM bacster_bacsession, bacster_bac, bacster_target, bacster_bacset WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacsession.id =%s", [bacsession_id])
+            desc = cursor.description
+            all = [
+                    dict(zip([col[0] for col in desc], row))
+                    for row in cursor.fetchall()
+                  ]
+            #f.open("/home/itoneva/test_object.txt", 'w')
+            #f.write(json.dumps(all))
+            #test = json.dumps(all[0]['seq']) + "\t" + json.dumps(all[0]['label'])
+	    #return HttpResponse(test, content_type="application/json")
+            return HttpResponse(blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", "")), content_type="application/json")

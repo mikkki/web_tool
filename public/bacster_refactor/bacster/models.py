@@ -37,6 +37,22 @@ class BacSession(models.Model):
         bac = models.ForeignKey(Bac)
         session = models.ForeignKey(Session)
 
+class BacItem(models.Model):
+	#The first element in each tuple is the actual value to be set on the model,
+	#and the second element is the human-readable name.
+	STRAND = (('+', '+'),('-','-'))
+
+	bacset     = models.ForeignKey(BacSet)
+	feature_id = models.CharField(max_length=150)                          # Col9: attributes->ID
+	seqid      = models.CharField(max_length=150)                          # Col1
+	source     = models.CharField(max_length=150)                          # Col2
+        feature_type = models.CharField(max_length=150)                        # Col3
+	start      = models.CharField(max_length=50)                           # Col4
+	end        = models.CharField(max_length=50)                           # Col5
+	score      = models.DecimalField(max_digits=16, decimal_places=6)      # Col6
+	strand     = models.CharField(max_length=1,                            # Col7
+				      choices=STRAND)
+
 class sessionCRUDView(NgCRUDView):
 	model = Session
 	slug_field = 'pioneer_id' #not unique!! cannot be used as slug_field

@@ -3,6 +3,7 @@
 import os, sys
 import json
 import re
+import decimal
 from optparse import OptionParser
 
 
@@ -21,11 +22,14 @@ def blast_parser(row, queries):
     bitscore       = elements[11]
     query_length   = elements[12]
     subject_length = elements[13]
-
+    aln_bases      = int((int(aln_len) * decimal.Decimal(identity) / 100))
+    identities     = str(aln_bases) + "/" + str(aln_len)
+    
     queries.append({"Query":query, "Subject":subject,
-                    "Percent Identity":identity, "Alignment Length":aln_len,
-                    "Query Start":query_start, "Query Stop":query_stop,
-                    "Query Length":query_length})
+                    "Percent_Identity":identity, "Alignment_Length":aln_len,
+                    "Query_Start":query_start, "Query_Stop":query_stop,
+                    "Query_Length":query_length, "e_value":evalue, 
+                    "Subject_Length":subject_length, "Identities":identities})
 #    if query in queries:
 #        if queries[query][subject]:
 #             continue
