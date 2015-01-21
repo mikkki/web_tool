@@ -7,19 +7,21 @@ use Pod::Usage; # so the user knows what's going on
 use DBI; # our DataBase Interface
 use Mysql;
 
-# Preliminary step - run this command:
+# Preliminary step - run these commands:
 # grep gene <( zcat /home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/tabix_gffs/HC69.BACs.ZmPHIv2.fixed.gff3.gz ) | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$NF}' >  HC69.bacitems.txt
+# grep gene <( zcat /home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/tabix_gffs/HG11.BACs.Regions.ZmPHIv2.fixed.gff3.gz ) | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$NF}' > HG11.bacitems.txt
+
 
  # get the command line options and environment variables
-my ($dbname, $username, $password, $host, $port, $file);
-
+my ($dbname, $username, $password, $host, $port, $files, $verbose);
 
 GetOptions("dbname=s"           => \$dbname,
            "username=s"         => \$username,
            "password=s"         => \$password,
            "host=s"             => \$host,
            "port=i"             => \$port,
-           "file=s"             => \$file,
+           "file=s"             => \$files,
+	   "v=s",         => \$verbose,
 	   );
 
 $dbname   = $dbname   || 'bacster';
@@ -27,52 +29,69 @@ $username = $username || 'bacster_dbo';
 $password = $password || 'h0^odprE';
 $host     = $host     || 'barclay';
 $port     = $port     || '';
-$file     = $file     || 'HC69.bacitems.txt';
+$files    = $files    || 'HC69.bacitems.txt, HG11.bacitems.txt';
+$verbose  = $verbose  || 0;
 
 #--- start sub-routine ------------------------------------------------
 sub ConnectToMySql {
 
     my ($db) = @_;
-
-# assign the values to your connection variable
     my $connectionInfo="dbi:mysql:$db;$host";
-
-# make connection to database
     my $l_connection = DBI->connect($connectionInfo,$username,$password);
-
-# the value of this connection is returned by the sub-routine
     return $l_connection;
-
 }
 #--- end sub-routine --------------------------------------------------
 
 print "Connecting to database $dbname\n";
+my $dbh = ConnectToMySql($dbname);
 
-# invoke the ConnectToMySQL sub-routine to make the database connection
-my $connection = ConnectToMySql($dbname);
+# delete all existing records in bacster_bacitem:
+my $query = "DELETE FROM bacster_bacitem";
+my $sth = $dbh->prepare($query) or die "Cannot prepare: " . $dbh->errstr();
+$sth->execute() or die "Cannot execute: " . $sth->errstr();
+$sth->finish();
 
-# set the value of your SQL query
-my $query = "SELECT VERSION()";
+my $count = 0 ;
+foreach my $file (split(/,\s*/, $files)){
+    open (MYFILE, $file); 
+    while (<MYFILE>) { 
+        my ($seqid, $source, $feature_type, $start, $end, $score, $strand, $attr) = split(/\t/, $_);
+        my ($feature_id, $bacset_id);
 
-# prepare your statement for connecting to the database
-my $statement = $connection->prepare($query);
+        if ($attr =~ /ID=([^;]+);/) {
+            $feature_id = $1;
+        } else {
+	    next;
+        }
 
-# execute your SQL statement
-$statement->execute();
+        if ($feature_id =~ /^([^\.]+)\./) {
+            my $bacitem_set = $1;    
+            $sth = $dbh->prepare("select id from bacster_bacset where label like ?");
+            $sth->bind_param( 1, "$bacitem_set%");
+            $sth->execute() or die "Cannot execute: " . $sth->errstr();
+	    $bacset_id = $sth->fetchrow_array();
+            $sth->finish();
+        } else {
+	    next;
+        }
 
-# retrieve the values returned from executing your SQL statement
-my @data = $statement->fetchrow_array();
+        my $sql = "INSERT INTO bacster_bacitem (seqid, source, feature_type, start, end, score, strand, feature_id, bacset_id) 
+                   VALUES ('$seqid', '$source', '$feature_type', '$start', '$end', '$score', '$strand', '$feature_id', '$bacset_id')";
+        $sth = $dbh->prepare($sql) or die "Cannot prepare: " . $dbh->errstr();
+        $sth->execute() or die "Cannot execute: " . $sth->errstr();
+        $sth->finish();       
+        $count++;
 
-# print the first (and only) value from the @data array
-# we add a \n for a new line (carriage return)
-print "$data[0] \n";
+        if($verbose) {
+            print $sql;
+        }
 
+    } # while (<MYFILE>) 
+    close (MYFILE);
 
-open (MYFILE, $file); 
-while (<MYFILE>) { 
-  chomp; print "$_\n"; 
-} 
-close (MYFILE);
+} # foreach my $file
+
+print "$count records entered in the bacster.bacster_bacitem\n";
 
 # exit the script
 exit;
