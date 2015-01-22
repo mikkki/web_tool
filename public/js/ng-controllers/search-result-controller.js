@@ -41,7 +41,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
                          angular.forEach(db_data, function(dbval, dbkey) {
      	                   //console.log("  feature: " + JSON.stringify(feature_id) + "; db key: " + JSON.stringify(dbkey) + "; db val: " + JSON.stringify(dbval.seqid)  );
-                           
+
 			   this.push(     {
 			       'Query'      : val.Query,                                       //'blast`s Query',
 			       'Bac ID'     : dbval.feature_id,                                //'db feature_id',
@@ -49,7 +49,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 			       'Identities' : val.Identities,                                  //'blast`s Identities',
 			       'Subject Length'  : val.Subject_Length,                              //'blast`s Subject_Length',
 			       'ChrPos'     : dbval.seqid+":"+dbval.start+"-"+dbval.end,        //'db seqid:start-end'
-			   });
+			   }); 
 			 }, $scope.results);    
                      }); 
                  });
