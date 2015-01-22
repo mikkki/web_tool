@@ -10,5 +10,6 @@
 
 <div class="k-block">
   <div class="k-header">Results</div>
-  <div class="gridStyle" ng-grid="gridOptions"></div>
+  <div ng-show="! session.data().search.results"><img src="/static/images/ajax-loader.gif"></div>
+  <div class="gridOptions" ng-grid="data.gridOptions"  ng-show="session.data().search.results"></div>
 </div>

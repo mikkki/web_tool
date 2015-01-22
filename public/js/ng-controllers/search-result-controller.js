@@ -11,6 +11,10 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   // make session available in the view''s scope
   $scope.session = session;
   $scope.results = [];
+  if(! $scope.data) {
+      $scope.data = {};
+  }
+
   session.data().search.results = null;
   session.save();
   
@@ -43,14 +47,18 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
      	                   //console.log("  feature: " + JSON.stringify(feature_id) + "; db key: " + JSON.stringify(dbkey) + "; db val: " + JSON.stringify(dbval.seqid)  );
 
 			   this.push(     {
-			       'Query'      : val.Query,                                       //'blast`s Query',
-			       'Bac ID'     : dbval.feature_id,                                //'db feature_id',
-			       'E-Value'    : val.e_value,                                     //'blast`s e_value',
-			       'Identities' : val.Identities,                                  //'blast`s Identities',
-			       'Subject Length'  : val.Subject_Length,                              //'blast`s Subject_Length',
-			       'ChrPos'     : dbval.seqid+":"+dbval.start+"-"+dbval.end,        //'db seqid:start-end'
+			       'Query'      : val.Query,                                       //blast: Query,
+			       'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
+			       'E-Value'    : val.e_value,                                     //blast: E_value,
+			       'Identities' : val.Identities,                                  //blast: Identities,
+			       'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
+			       'ChrPos'     : dbval.seqid+":"+dbval.start+"-"+dbval.end,       //db:    seqid:start-end
 			   }); 
 			 }, $scope.results);    
+                         if (! session.data().search.results) {
+  			     session.data().search.results = $scope.results;
+			     session.save();
+		         }
                      }); 
                  });
 	     });	 
@@ -58,10 +66,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   });
 
 
-
-  $scope.gridOptions = {
+  $scope.data.gridOptions = {
     data: 'results',
     plugins: [new ngGridFlexibleHeightPlugin()]
   };
-  
 });
