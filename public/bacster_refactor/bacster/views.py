@@ -50,7 +50,7 @@ def session_targets_old(request, session_id, organism_id, genome_id, bacset_id):
 
 def session_targets(request, session_id):
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM bacster_organism, bacster_genome, bacster_bacset, bacster_targettype, bacster_target, bacster_bac, bacster_bacsession where bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_target.targettype_id = bacster_targettype.id and bacster_bacset.genome_id = bacster_genome.id and bacster_genome.organism_id = bacster_organism.id and bacster_bacsession.session_id =%s", [session_id])
+        cursor.execute("SELECT *, bacster_bacsession.id bacsession_id FROM bacster_organism, bacster_genome, bacster_bacset, bacster_targettype, bacster_target, bacster_bac, bacster_bacsession where bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_target.targettype_id = bacster_targettype.id and bacster_bacset.genome_id = bacster_genome.id and bacster_genome.organism_id = bacster_organism.id and bacster_bacsession.session_id =%s", [session_id])
         desc = cursor.description
         all = [
                 dict(zip([col[0] for col in desc], row))
@@ -68,6 +68,17 @@ def bacsessions(request, session_id):
               ]
         return HttpResponse(json.dumps(all), content_type="application/json")      
 
+def bacitem(request, feature_id):
+        cursor = connection.cursor()
+        cursor.execute("SELECT id, feature_id, feature_type, seqid, start, end, CAST(score as CHAR) score, bacset_id FROM bacster_bacitem where feature_id =%s", [feature_id])
+        desc = cursor.description
+        all = [
+                dict(zip([col[0] for col in desc], row))
+                for row in cursor.fetchall()
+              ]
+        return HttpResponse(json.dumps(all), content_type="application/json")
+
+
 def blast(request, bacsession_id):
             cursor = connection.cursor()
             cursor.execute("SELECT * FROM bacster_bacsession, bacster_bac, bacster_target, bacster_bacset WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacsession.id =%s", [bacsession_id])
@@ -76,8 +87,4 @@ def blast(request, bacsession_id):
                     dict(zip([col[0] for col in desc], row))
                     for row in cursor.fetchall()
                   ]
-            #f.open("/home/itoneva/test_object.txt", 'w')
-            #f.write(json.dumps(all))
-            #test = json.dumps(all[0]['seq']) + "\t" + json.dumps(all[0]['label'])
-	    #return HttpResponse(test, content_type="application/json")
             return HttpResponse(blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", "")), content_type="application/json")

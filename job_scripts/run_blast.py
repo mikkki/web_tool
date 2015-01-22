@@ -21,7 +21,10 @@ def blast_targets(query, dbs):
 #cmd       = blast_cmd + " -db " + database + " -query " + query + " -out " + output + " -outfmt '7 std qlen slen'" 
     #cmd       = blast_cmd + " -db /home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/blast_references/" + dbs + "_DbS_BAC_assemblies_v1.fa -query <( echo -e \"" + query + "\" ) -outfmt '7 std qlen slen'" 
     cmd       = blast_cmd + " -db /home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/blast_references/" + dbs + "_DbS_BAC_assemblies_v1.fa -query <( echo -e \"" + query + "\" ) -outfmt '7 std qlen slen'" 
+
     json_results = []
+    seen = {}
+    count = 0
     #sys.stdout.write(str(cmd))
 
     check = re.compile('^#|^\s*$|^{}$')
@@ -37,11 +40,15 @@ def blast_targets(query, dbs):
         if check.match(record):
 	    continue
         
-        record = record.rstrip('\n')
-        blast_parser(record, json_results)
-
-    #sys.stdout.write(str(json.dumps(json_results)))
+        if count < 10:
+            count = blast_parser(record, json_results, count, seen)
+            record = record.rstrip('\n')
+        else:
+            result.terminate()
+            break
     #sys.stdout.flush()
+    
+    #sys.stdout.write(str(json.dumps(json_results)))
     return json.dumps(json_results)
 
 if __name__ == "__main__":

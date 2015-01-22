@@ -3,8 +3,16 @@
  * session data, in a manner accessable by any angular contoller.
  */
 
+
+app.factory('Bacitem', ['$resource', function($resource) {
+        return $resource('crud/bacitem/:feature_id', {"feature_id": "@feature_id"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
+app.factory('Blast_targets', ['$resource', function($resource) {
+        return $resource('crud/blast_targets/:bacsession', {"bacsession": "@bacsession"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
 app.factory('Get_targets', ['$resource', function($resource) {
-        //return $resource('crud/session_targets/:session/:organism/:genome/:bacset', {"session": "@session", "organism": "@organism", "genome": "@genome", "bacset": "@bacset"}, {'query':  {method:'GET', isArray:true}});
 	return $resource('crud/session_targets/:session', {"session": "@session"}, {'query':  {method:'GET', isArray:true}});
 }]);
 

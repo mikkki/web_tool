@@ -22,4 +22,5 @@ urlpatterns = patterns('bacster.views',
     url(r'^crud/sessioninfo/(?P<pk>\d+)$', sessionCRUDView.as_view(), name='session_view_param'),
     url(r'^crud/sessioninfo_pid/(?P<pioneer_id>\d+)$', views.multiobject, name='pid_session_view_param'),                
     url(r'^crud/blast_targets/(?P<bacsession_id>\d+)$', views.blast, name='blast_test'),
+    url(r'^crud/bacitem/(?P<feature_id>.+)$', views.bacitem, name='blast_test'),                       
 )

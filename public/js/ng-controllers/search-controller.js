@@ -99,7 +99,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       });    
   };
   
-
   if (! $scope.myData ) {
      $scope.myData = [];   
      set_targets();
