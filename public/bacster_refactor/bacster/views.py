@@ -90,6 +90,6 @@ def blast(request, bacsession_id):
             return HttpResponse(blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", "")), content_type="application/json")
 
 
-def tabix_interval(request, chr, start, end):
+def tabix_interval(request, chr, start, end, bacset):
 
             return
