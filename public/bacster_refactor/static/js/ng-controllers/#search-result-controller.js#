@@ -7,12 +7,16 @@
  */
 app.controller('searchResultController', function($scope, $state, $http, $resource,
                Blast_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
-
+  
+  // make session available in the view''s scope
+  $scope.session = session;
   $scope.results = [];
-
   if(! $scope.data) {
       $scope.data = {};
   }
+
+  session.data().search.results = null;
+  session.save();
   
   var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
       var bacsessions = [];
@@ -51,11 +55,18 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 			       'ChrPos'     : dbval.seqid+":"+dbval.start+"-"+dbval.end,       //db:    seqid:start-end
 			   }); 
 			 }, $scope.results);    
+                         if (! session.data().search.results) {
+  			     session.data().search.results = $scope.results;
+			     session.save();
+		         }
                      }); 
                  });
 	     });	 
          });
   });
+
+  $scope.people = ['fox', 'rosi', 'err3', 'rob', 'cesar', 'geoff'];
+
 
   $scope.data.gridOptions = {
     data: 'results',
