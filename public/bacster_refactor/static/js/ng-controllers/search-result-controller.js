@@ -40,8 +40,6 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      //get the record(s) from bacster_bacitem corresponding to this feature_id:
 		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
                          angular.forEach(db_data, function(dbval, dbkey) {
-     	                   //console.log("  feature: " + JSON.stringify(feature_id) + "; db key: " + JSON.stringify(dbkey) + "; db val: " + JSON.stringify(dbval.seqid)  );
-
 			   this.push(     {
 			       'Query'      : val.Query,                                       //blast: Query,
 			       'Bac ID'     : dbval.feature_id,                                //db:    feature_id,

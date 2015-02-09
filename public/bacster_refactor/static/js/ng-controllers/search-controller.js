@@ -36,6 +36,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   if(! $scope.data) {
     $scope.data = {};
   }
+
+  if( ! $scope.myData ) {
+    $scope.myData = []
+  }
  
   /*
    * organisms 
@@ -99,10 +103,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       });    
   };
   
-  if (! $scope.myData ) {
-     $scope.myData = [];   
-     set_targets();
-  }
+  set_targets();
 
   $scope.data.gridOptions = {
     data: 'myData',
@@ -263,6 +264,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    	        var target = new Target({pk: target_id});
 		//delete target records (all corresponding records in bac and bacsession will be deleted too):
 		target.$remove();
+                $scope.myData.pop();
 	    });
 	});
      }
@@ -294,9 +296,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                   //new record in bacster_bacsession:
                   var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
                   new_bacsession.$save(function(){
- 	            if( ! $scope.myData ) {
-			$scope.myData = []
-		    }
 		    $scope.myData.push({ 'target' : target, 'search type' : searchmode});
                   });
               });
