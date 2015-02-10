@@ -92,7 +92,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
         angular.forEach(gettar, function(val, key) { 	
              //set the target type:
              session.data().search.targettype = val.label;
-             session.data().search.target_added = 1;
 	     session.save();
              if (val.label == "fasta") {
                this.push({ 'target' : val.seq, 'search type' : val.label});                 
@@ -229,10 +228,19 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // target types are undefined behavior )
   $scope.allowSearchTarget = function(targetType) {
 
+    if(! $scope.targetType) {
+      return true; // allow either type of serch
+    }
+
+    return $scope.targetType == targetType;
+
+    /*
     if( (! session.data().search) || (! session.data().search.targettype)) {
       return true; // allow either type of serch
     }
+
     return session.data().search.targettype == targetType;
+    */
   };
 
   // callback for fasta example data button
@@ -254,7 +262,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
         $scope.data.addFasta = null;
         $scope.data.addCoords = null;
         session.data().search.targettype = null;
-	session.data().search.target_added = null;
         session.save();
 
         var bacsess = $resource('crud/bacsessions/:session', {session: session.data().user.id}).query({}, function(bacsess_data){

@@ -23,5 +23,7 @@ urlpatterns = patterns('bacster.views',
     url(r'^crud/sessioninfo_pid/(?P<pioneer_id>\d+)$', views.multiobject, name='pid_session_view_param'),                
     url(r'^crud/blast_targets/(?P<bacsession_id>\d+)$', views.blast, name='blast_test'),
     url(r'^crud/bacitem/(?P<feature_id>.+)$', views.bacitem, name='blast_test'),                       
-    url(r'^crud/tabix_interval/(?P<chr>\w+)/(?P<start>\d+)/(?P<end>\d+)/(?P<bacset>\w+)$', views.tabix_interval, name='tabix_interval'),
+    url(r'^crud/tabix_interval/(?P<bacsession_id>\d+)$', views.tabix_interval, name='tabix_interval'),
+    #url(r'^crud/tabix_interval/(?P<chr>\w+)/(?P<start>\d+)/(?P<end>\d+)/(?P<bacset>\w+)$', views.tabix_interval, name='tabix_interval'),
+
 )

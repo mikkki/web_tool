@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.template import Template, Context
 import json
 from django.core.context_processors import csrf
-import os, sys
+import os, sys, re
 from djangular.views.crud import NgCRUDView
 import MySQLdb
 from django.db import connection
@@ -15,6 +15,8 @@ from django.views.generic import FormView
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from run_blast import blast_targets
+from run_tabix import run_tabix
+
 
 @ensure_csrf_cookie
 
@@ -90,6 +92,15 @@ def blast(request, bacsession_id):
             return HttpResponse(blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", "")), content_type="application/json")
 
 
-def tabix_interval(request, chr, start, end, bacset):
-
-            return
+def tabix_interval(request, bacsession_id):
+            cursor = connection.cursor()
+            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref FROM bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and  bacster_bacsession.id =%s", [bacsession_id])
+            desc = cursor.description
+            all = [
+                    dict(zip([col[0] for col in desc], row))
+                    for row in cursor.fetchall()
+                  ]
+            #coords, organism, gff_ref - "ZmChr0v2:10000-100000", "zea_mays", "HC69"
+            regex    = re.compile(r'\(([a-zA-Z ]+)\)')
+            organism = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
+            return HttpResponse(run_tabix(all[0]['coords'], organism, all[0]['gff_ref'].split('.')[0].replace("\"", "")), content_type="application/json")
