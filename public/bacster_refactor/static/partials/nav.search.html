@@ -63,7 +63,7 @@
       </div>
       <div class="gridStyle"
 	   ng-grid="data.gridOptions"
-	   ng-show="myData.length">
+	   ng-if="myData.length > 0">
       </div>
       <br>
       <div ng-if="! data.searchTargetMode">

@@ -56,8 +56,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	     });
            } else {
 	       var json_results = Coord_targets.query({bacsession: val}, function(json_data){
-		   angular.forEach(json_data, function(val, key) {
-		       console.log("region : " + val.SeqID + ", " + val.BacID + ", " + val.Score);
+		   angular.forEach(json_data, function(val, key) {    
 		       this.push({
                                'SeqID'      : val.SeqID,
                                'Bac ID'     : val.BacID,
@@ -71,7 +70,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   });
 
   $scope.data.gridOptions = {
-    data: 'results',
+    data: 'results',    
     plugins: [new ngGridFlexibleHeightPlugin()]
   };
 });
