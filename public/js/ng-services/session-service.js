@@ -8,6 +8,10 @@ app.factory('Bacitem', ['$resource', function($resource) {
         return $resource('crud/bacitem/:feature_id', {"feature_id": "@feature_id"}, {'query':  {method:'GET', isArray:true}});
 }]);
 
+app.factory('Coord_targets', ['$resource', function($resource) {
+    return $resource('crud/tabix_interval/:bacsession', {"bacsession": "@bacsession"}, {'query':  {method:'GET', isArray:true}});
+}]);
+
 app.factory('Blast_targets', ['$resource', function($resource) {
         return $resource('crud/blast_targets/:bacsession', {"bacsession": "@bacsession"}, {'query':  {method:'GET', isArray:true}});
 }]);

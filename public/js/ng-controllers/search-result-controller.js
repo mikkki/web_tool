@@ -6,7 +6,7 @@
  * service to start search job, the display results.
  */
 app.controller('searchResultController', function($scope, $state, $http, $resource,
-               Blast_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
+               Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
 
   $scope.results = [];
 
@@ -21,6 +21,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	 }, bacsessions);
 
          angular.forEach(bacsessions, function(val, key) {
+
+	   if(session.data().search.targettype == "fasta" ){
 	     var json_results = Blast_targets.query({bacsession: val}, function(json_data){
                  angular.forEach(json_data, function(val, key) {
                      /* key is array index; val is an object like:
@@ -40,8 +42,6 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      //get the record(s) from bacster_bacitem corresponding to this feature_id:
 		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
                          angular.forEach(db_data, function(dbval, dbkey) {
-     	                   //console.log("  feature: " + JSON.stringify(feature_id) + "; db key: " + JSON.stringify(dbkey) + "; db val: " + JSON.stringify(dbval.seqid)  );
-
 			   this.push(     {
 			       'Query'      : val.Query,                                       //blast: Query,
 			       'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
@@ -53,8 +53,21 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 			 }, $scope.results);    
                      }); 
                  });
-	     });	 
-         });
+	     });
+           } else {
+	       var json_results = Coord_targets.query({bacsession: val}, function(json_data){
+		   angular.forEach(json_data, function(val, key) {
+		       console.log("region : " + val.SeqID + ", " + val.BacID + ", " + val.Score);
+		       this.push({
+                               'SeqID'      : val.SeqID,
+                               'Bac ID'     : val.BacID,
+                               'Score'      : val.Score, 
+                               'ChrPos'     : val.Region,
+ 			       });
+                   }, $scope.results);
+	       });
+           }	 
+       });
   });
 
   $scope.data.gridOptions = {
