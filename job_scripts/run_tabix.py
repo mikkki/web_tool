@@ -45,11 +45,11 @@ def region_to_jbrowse(region, gff_ref, id, organism):
 
         if os.path.isdir(check_path):
 		sys.stderr.write("instance:" + track_label + " exists\n")
-		sys.exit()
-
-	cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures --out " + '$JBROWSE_HOME/' + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label
+		#sys.exit(0)
+        else:
+		cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures --out " + '$JBROWSE_HOME/' + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label
 	#sys.stdout.write(str(cmd))
-	shell = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
+		shell = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
 
 
 def collect_results(id, organism):
@@ -59,7 +59,7 @@ def collect_results(id, organism):
 
 	if not (os.path.isdir(check_path) and len(tracks) > 0):
 		sys.stderr.write("something is awry, please check" + check_path)
-		sys.exit()
+		sys.exit(0)
 
         if not os.path.isdir(check_path + "/main"):
 		cmd   = "cp -r " + main + "/main_template/ " + check_path + "/main;ln -s " + main + "/refs/" + organism + "/seq " + check_path + "/main"

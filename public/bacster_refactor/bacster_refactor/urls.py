@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     #url(r'^$', 'index', {'template_name' : 'bacster/index.html'}, name='index'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^bacster/', include('bacster.urls')),
-    url(r'^$', include('bacster.urls')),
+
 #    url(r'^crud/sessioninfo$', sessionCRUDView.as_view(), name='my_crud_view'),
 #    url(r'^crud/sessioninfo/(?P<pk>\d+)$', sessionCRUDView.as_view(), name='my_crud_view_param'),
 #    url(r'^crud/sessioninfo/pioneer$', views.multiobject, name='pid_my_crud_view_param'),

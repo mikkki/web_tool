@@ -21,8 +21,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	 }, bacsessions);
 
          angular.forEach(bacsessions, function(val, key) {
+ 	   if(session.data().search.targettype == "fasta" ){
 
-	   if(session.data().search.targettype == "fasta" ){
 	     var json_results = Blast_targets.query({bacsession: val}, function(json_data){
                  angular.forEach(json_data, function(val, key) {
                      /* key is array index; val is an object like:

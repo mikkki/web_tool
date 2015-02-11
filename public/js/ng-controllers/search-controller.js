@@ -50,7 +50,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   var o = Organism.query({}, function(){
       $scope.data.organismSource = { 'type' : 'json', 'data' : o };
   });
-  console.log("scope.data.organismSource: " + JSON.stringify($scope.data.organismSource));
+
   /*
    * genomes
    */
@@ -65,7 +65,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           }
       }, genomeReferences);
   });
-  console.log("genomeReferences:  "+ JSON.stringify(genomeReferences));
 
   /*
    * DbS datasets
@@ -93,6 +92,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
              //set the target type:
              session.data().search.targettype = val.label;
 	     session.save();
+
              if (val.label == "fasta") {
                this.push({ 'target' : val.seq, 'search type' : val.label});                 
              } else {
@@ -227,20 +227,20 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
   $scope.allowSearchTarget = function(targetType) {
-
+    /*
     if(! $scope.targetType) {
       return true; // allow either type of serch
     }
 
     return $scope.targetType == targetType;
-
-    /*
+    */
+    
     if( (! session.data().search) || (! session.data().search.targettype)) {
       return true; // allow either type of serch
     }
 
     return session.data().search.targettype == targetType;
-    */
+    
   };
 
   // callback for fasta example data button
@@ -290,6 +290,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       var tt = Targettype.get({label: searchmode}, function(){
 	  var tt_id = tt.pk;
           //new record in bacster_target:
+	  session.data().search.targettype = searchmode;
+	  session.save();
 	  var new_target;
           if (searchmode == 'fasta') {
               new_target = new Target({seq: target, coords: "-", targettype: tt_id});
