@@ -80,11 +80,12 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
     plugins: [new ngGridFlexibleHeightPlugin()]
   };
 
+/*
   $scope.$on('ngGridEventData', function(){
       $scope.data.gridOptions.selectRow(0, true);
       console.log("selected: " + $scope.data.gridOptions.selectedItems[0].ChrPos);
   });
-/*
+
   $scope.selectRow = function(){
       angular.forEach($scope.results, function(data, index){
 	  console.log("selected: " + data.ChrPos);
