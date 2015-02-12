@@ -69,8 +69,30 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
        });
   });
 
+  $scope.mySel =[];
   $scope.data.gridOptions = {
     data: 'results',    
+    showSelectionCheckbox: true,
+    selectedItems: $scope.mySel,
+    afterSelectionChange: function(data) { 
+	console.log("here it is :  " ,$scope.mySel);
+    },
     plugins: [new ngGridFlexibleHeightPlugin()]
   };
+
+  $scope.$on('ngGridEventData', function(){
+      $scope.data.gridOptions.selectRow(0, true);
+      console.log("selected: " + $scope.data.gridOptions.selectedItems[0].ChrPos);
+  });
+/*
+  $scope.selectRow = function(){
+      angular.forEach($scope.results, function(data, index){
+	  console.log("selected: " + data.ChrPos);
+      });
+  };
+*/
+
+  //console.log($scope.data.gridOptions);  
+
+
 });
