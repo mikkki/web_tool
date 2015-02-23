@@ -5,7 +5,7 @@
  * search targets are in session.data().search.targets[]. Use $http
  * service to start search job, the display results.
  */
-app.controller('searchResultController', function($scope, $state, $http, $resource,
+app.controller('searchResultController', function($scope, $state, $http, $resource, $location,
                Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
 
   $scope.results = [];
@@ -20,10 +20,10 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
              this.push(val.bacsession_id);
 	 }, bacsessions);
 
-         angular.forEach(bacsessions, function(val, key) {
+         angular.forEach(bacsessions, function(bval, key) {
  	   if(session.data().search.targettype == "fasta" ){
-
-	     var json_results = Blast_targets.query({bacsession: val}, function(json_data){
+             console.log("bacsess: " + bval + " location: " + window.location.origin);
+	     var json_results = Blast_targets.query({bacsession: bval}, function(json_data){
                  angular.forEach(json_data, function(val, key) {
                      /* key is array index; val is an object like:
   		        {"Percent_Identity":"98.33",
@@ -42,26 +42,30 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      //get the record(s) from bacster_bacitem corresponding to this feature_id:
 		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
                          angular.forEach(db_data, function(dbval, dbkey) {
-			   this.push(     {
+  		           var link = dbval.seqid+":"+dbval.start+"-"+dbval.end;  
+   		           this.push(     {
 			       'Query'      : val.Query,                                       //blast: Query,
 			       'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
 			       'E-Value'    : val.e_value,                                     //blast: E_value,
 			       'Identities' : val.Identities,                                  //blast: Identities,
 			       'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
-			       'ChrPos'     : dbval.seqid+":"+dbval.start+"-"+dbval.end,       //db:    seqid:start-end
+                               'bacsession_id'   : bval, 
+			       'chrpos'          : link, 
 			   }); 
 			 }, $scope.results);    
                      }); 
                  });
 	     });
            } else {
-	       var json_results = Coord_targets.query({bacsession: val}, function(json_data){
+	       var json_results = Coord_targets.query({bacsession: bval}, function(json_data){
 		   angular.forEach(json_data, function(val, key) {    
 		       this.push({
                                'SeqID'      : val.SeqID,
                                'Bac ID'     : val.BacID,
-                               'Score'      : val.Score, 
-                               'ChrPos'     : val.Region,
+                               'Score'      : val.Score,
+                               'bacsession_id'   : bval, 
+                               'chrpos'     : val.Region,
+
  			       });
                    }, $scope.results);
 	       });
@@ -69,15 +73,26 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
        });
   });
 
-  $scope.mySel =[];
   $scope.data.gridOptions = {
     data: 'results',    
-    showSelectionCheckbox: true,
-    selectedItems: $scope.mySel,
-    afterSelectionChange: function(data) { 
-	console.log("here it is :  " ,$scope.mySel);
-    },
-    plugins: [new ngGridFlexibleHeightPlugin()]
+    enableRowSelection: false,
+    plugins: [new ngGridFlexibleHeightPlugin()],
+
+
+    columnDefs: [{ field: 'Query', displayName: 'Query' },
+  	         { field: 'Bac ID', displayName: 'Bac ID' },
+		 { field: 'E-Value', displayName: 'E-Value' },
+		 { field: 'Identities', displayName: 'Identities' },
+		 { field: 'Subject Length', displayName: 'Subject Length' },
+                 { field: 'bacsession_id', visible: false },
+	         { field: 'chrpos', 
+                   displayName: 'ChrPos', 
+                   cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
+                                    <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(col.field) }}{% endverbatim %}" target="_blank">\
+                                      {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
+                                    </a>\
+                                  </div>' }
+                ]
   };
 
 /*

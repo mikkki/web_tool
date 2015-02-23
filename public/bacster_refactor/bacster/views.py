@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import Template, Context
 import json
@@ -106,9 +106,9 @@ def tabix_interval(request, bacsession_id):
             return HttpResponse(run_tabix(all[0]['coords'], organism, all[0]['gff_ref'].split('.')[0].replace("\"", "")), content_type="application/json")
 
 
-def format_jbrowse(request, bacsession_id):
+def format_jbrowse(request, bacsession_id, region):
             cursor = connection.cursor()
-            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacsession.id =%s", [bacsession_id])
+            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM  bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session, bacster_genome WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacset.genome_id = bacster_genome.id and bacster_bacsession.id =%s", [bacsession_id])
             desc = cursor.description
             all = [
                     dict(zip([col[0] for col in desc], row))
@@ -116,11 +116,21 @@ def format_jbrowse(request, bacsession_id):
                   ]
                   #region, gff_ref, id, organism
 
-            id       = str(all[0]['pioneer_id']) + '-' + str(all[0]['session_id']) 
-            regex    = re.compile(r'\(([a-zA-Z ]+)\)')
-            organism = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
-            #sys.stderr.write(id + organism );
-            return HttpResponse(region_to_jbrowse(all[0]['coords'], all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism), content_type="application/json")
+            id         = str(all[0]['pioneer_id']) + '-' + str(all[0]['session_id'])
+            len        = all[0]['len']
+            regex      = re.compile(r'\(([a-zA-Z ]+)\)')
+            organism   = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
+            start      = int(region.split(':')[1].split('-')[0]) - 100000
+            start      = start if start > 0 else 1
+            end        = int(region.split(':')[1].split('-')[1]) + 100000
+            end        = len if end > len else end
+            ext_region = region.split(':')[0] + ":" + str(start) + "-" + str(end)            
+            #var = region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)
+            #sys.stderr.write(str(var))            
+            #return HttpResponse(json.dumps(region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)), content_type="text/plain")
+            
+            return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
+
 
 def collect_tracks(request, bacsession_id):
         cursor = connection.cursor()
@@ -133,4 +143,4 @@ def collect_tracks(request, bacsession_id):
         id       = str(all[0]['pioneer_id']) + '-' + str(all[0]['session_id'])
         regex    = re.compile(r'\(([a-zA-Z ]+)\)')
         organism = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
-        return HttpResponse(collect_results(id, organism), content_type="application/json")
+

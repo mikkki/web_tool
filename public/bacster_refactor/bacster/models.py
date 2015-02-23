@@ -16,6 +16,7 @@ class Organism(models.Model):
 class Genome(models.Model):
 	label    = models.CharField(max_length=150)
         organism = models.ForeignKey(Organism)
+        len      = models.BigIntegerField(default=0)
 
 class BacSet(models.Model):
 	label  = models.CharField(max_length=150)
