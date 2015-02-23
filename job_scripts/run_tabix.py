@@ -90,7 +90,7 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
 
 	sys.stdout.write(str(url + id + "/" + organism + "/main/\n"))
 
-	return url + id + "/" + organism + "/main/"
+	return str(url + id + "/" + organism + "/main/")
 
 
 def collect_results(id, organism):
