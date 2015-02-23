@@ -57,8 +57,8 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
 	stream = shell.communicate()[0]
         code = shell.returncode
 
-        #sys.stderr.write("odd\n" + shell.returncode + "\n")
         if code != 0:
+        	sys.stderr.write("Track Formatting Failed: " + shell.returncode + "\n")
                 return False
 
 	if not os.path.isdir(main_path + "/main"):
@@ -70,10 +70,12 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
 
         #sys.stderr.write("odd\n" + shell.returncode + "\n")
 	        if code != 0:
+        		sys.stderr.write("Main Creation Failed: " + shell.returncode + "\n")
         	        return False
 
 	if os.path.isdir(main_path + "/main/tracks/" + track_label):
-		return 0
+        	sys.stderr.write("Main Instance: " + main_path + "/main/tracks/" + track_label + " exists\n")
+		return str(url + id + "/" + organism + "/main/")
 
 	cmd   = "head -14 " + main_path + "/" + track_label + "/trackList.json | tail -12 | add-track-json.pl " + main_path + "/main/trackList.json;cp -r " + main_path + "/" + track_label + "/tracks/* " + main_path + "/main/tracks"
 
@@ -86,6 +88,7 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
 
         #sys.stderr.write("odd\n" + shell.returncode + "\n")
         if code != 0:
+		sys.stderr.write("Main Track Formatting and Addition Failed: " + str(shell.returncode) + "\n")
                 return False
 
 	sys.stdout.write(str(url + id + "/" + organism + "/main/\n"))
@@ -126,7 +129,7 @@ def collect_results(id, organism):
 		if code != 0:
 			return False 
 
-	return str(url + id + "/" + organism + "/main/")
+	return str(url) + str(id) + "/" + str(organism) + "/main/"
 
 
 def region_to_jbrowse(region, gff_ref, id, organism):

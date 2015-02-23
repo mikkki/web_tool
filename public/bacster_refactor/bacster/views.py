@@ -108,7 +108,8 @@ def tabix_interval(request, bacsession_id):
 
 def format_jbrowse(request, bacsession_id, region):
             cursor = connection.cursor()
-            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM  bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session, bacster_genome WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacset.genome_id = bacster_genome.id and bacster_bacsession.id =%s", [bacsession_id])
+            genome = region.split(':')[0] 
+            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM  bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session, bacster_genome WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacsession.id =%s and bacster_genome.label =%s", [bacsession_id, genome])
             desc = cursor.description
             all = [
                     dict(zip([col[0] for col in desc], row))
@@ -121,12 +122,12 @@ def format_jbrowse(request, bacsession_id, region):
             regex      = re.compile(r'\(([a-zA-Z ]+)\)')
             organism   = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
             start      = int(region.split(':')[1].split('-')[0]) - 100000
-            start      = start if start > 0 else 1
+            start      = start if int(start) > 0 else 1
             end        = int(region.split(':')[1].split('-')[1]) + 100000
-            end        = len if end > len else end
-            ext_region = region.split(':')[0] + ":" + str(start) + "-" + str(end)            
+            end        = len if int(end) > int(len) else end
+            ext_region = genome + ":" + str(start) + "-" + str(end)            
             #var = region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)
-            #sys.stderr.write(str(var))            
+            #sys.stderr.write("len: " + str(len))            
             #return HttpResponse(json.dumps(region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)), content_type="text/plain")
             
             return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
