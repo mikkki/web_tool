@@ -56,19 +56,6 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      }); 
                  });
 	     });
-           } else {
-	       var json_results = Coord_targets.query({bacsession: bval}, function(json_data){
-		   angular.forEach(json_data, function(val, key) {    
-		       this.push({
-                               'SeqID'      : val.SeqID,
-                               'Bac ID'     : val.BacID,
-                               'Score'      : val.Score,
-                               'bacsession_id'   : bval, 
-                               'chrpos'     : val.Region,
-
- 			       });
-                   }, $scope.results);
-	       });
            }	 
        });
   });

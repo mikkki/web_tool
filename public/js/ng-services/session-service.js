@@ -3,6 +3,9 @@
  * session data, in a manner accessable by any angular contoller.
  */
 
+app.factory('FormatJbrowse', ['$resource', function($resource) {
+        return $resource('crud/format_jbrowse/:bacsession/:region', {"bacsession": "@bacsession", "region": "@region"}, {'query':  {method:'GET', isArray:false}});
+}]);
 
 app.factory('Bacitem', ['$resource', function($resource) {
         return $resource('crud/bacitem/:feature_id', {"feature_id": "@feature_id"}, {'query':  {method:'GET', isArray:true}});

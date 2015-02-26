@@ -93,6 +93,8 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
 
 	sys.stdout.write(str(url + id + "/" + organism + "/main/\n"))
 
+        #sys.stdout.write(str("\n\n--------------\n What The Hell ?? " + str(cmd) + "\n return code: " + str(code) +"\n-------------------\n\n"))
+
 	return str(url + id + "/" + organism + "/main/")
 
 
@@ -107,7 +109,7 @@ def collect_results(id, organism):
 		return False
 
         if not os.path.isdir(check_path + "/main"):
-		cmd   = "mkdir -p " + + check_path + "/main;cp -r " + main + "/main_template/ " + check_path + "/main;ln -s " + main + "/refs/" + organism + "/seq " + check_path + "/main"
+		cmd   = "mkdir -p " + check_path + "/main;cp -r " + main + "/main_template/* " + check_path + "/main;ln -s " + main + "/refs/" + organism + "/seq " + check_path + "/main"
 
 		shell = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
 		stream = shell.communicate()[0]
@@ -152,17 +154,17 @@ def region_to_jbrowse(region, gff_ref, id, organism):
 	if code != 0:
 		return False
 
-	url = collect_results(id, organism)
+	#url = collect_results(id, organism)
 
-	if url:
-		sys.stderr.write("this is my url: " + url + "\n")
-		return url
+	#if url:
+	#	sys.stderr.write("this is my url: " + url + "\n")
+	#	return url
 	
-	return str("this is broken")
+	#return str("this is broken")
 
 
 if __name__ == "__main__":
 	#run_tabix("ZmChr0v2:10000-100000", "zea_mays", "HC69")
 	#region_to_jbrowse("ZmChr0v2:10000-170000", "HC69", "12345-99", "zea_mays") #pioneer-id session_id
-	region_to_jbrowse2("ZmChr0v2:10000-170000", "HC69", "12345-99", "zea_mays") #pioneer-id session_id
-	#collect_results("12345-99", "zea_mays") #pioneer-id session_id
+	#region_to_jbrowse2("ZmChr0v2:100000-1700000", "HC69", "12345-99", "zea_mays") #pioneer-id session_id
+	collect_results("e34-132", "zea_mays") #pioneer-id session_id

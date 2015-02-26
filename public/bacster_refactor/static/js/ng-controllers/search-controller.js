@@ -3,8 +3,8 @@
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route,
-					    Session, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
+app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q,
+					    FormatJbrowse, Session, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
   // make session available in the view''s scope
   $scope.session = session;
@@ -158,7 +158,64 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       session.data().search.dbs = $scope.data.dbs;
     }
     session.save();
-    $state.go('nav.search-result');
+    if(session.data().search.targettype == "fasta" ){
+      // Go to Search result page when search targets are fasta:
+      $state.go('nav.search-result');
+    } else {
+
+    function format_jbrowse(bacsession_id, coords) {
+        var jb = new FormatJbrowse.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
+                 var time = new Date().getTime();          
+                 console.log("adding a track..." + bacsession_id + " / " + coords +" ; url:  "+ jbrowse.url + " time: " + time);
+                 session.data().search.jbrowse = jbrowse.url;
+                 session.save();
+        });
+    }
+
+    function jb() {
+      var defer = $q.defer();   
+      var promises = [];
+      
+      function foo() {
+
+	  console.log("IM foo....");
+	  return defer.resolve();
+      }
+      // Open JBrowse in a new tab when search targets are coords: 
+      var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){ 
+          var count = 0;
+	  angular.forEach(gettar, function(val, key) {
+	         promises.push(format_jbrowse(val.bacsession_id, val.coords));
+		 count += 1;	
+      	         console.log("now... "+ val.bacsession_id+ "; " + val.coords + " ; count: " + count);           	     
+	  });
+
+          $q.all(promises).then(defer.resolve())
+          .then(function(){
+	      var time = new Date().getTime();
+	      console.log("after resolve 1... " + time)
+	  })
+	  .then(function(){
+	      var time = new Date().getTime();
+              console.log("after resolve 2... " + time)
+	      })
+	  .then(function(){
+              var time = new Date().getTime();
+              console.log("after resolve 3... " +time)
+	      })
+	  .then(function(){
+	      var time = new Date().getTime();
+              console.log("after resolve 4... " + time)
+	      });
+      });
+      return defer.promise;
+     } //jb
+     
+	 jb();
+         //foo();
+         $window.open("http://" + session.data().search.jbrowse);     
+
+    }
   }
   
   // callback for user selected a genome

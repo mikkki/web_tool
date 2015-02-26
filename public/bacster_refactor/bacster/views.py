@@ -52,7 +52,21 @@ def session_targets_old(request, session_id, organism_id, genome_id, bacset_id):
 
 def session_targets(request, session_id):
         cursor = connection.cursor()
-        cursor.execute("SELECT *, bacster_bacsession.id bacsession_id FROM bacster_organism, bacster_genome, bacster_bacset, bacster_targettype, bacster_target, bacster_bac, bacster_bacsession where bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_target.targettype_id = bacster_targettype.id and bacster_bacset.genome_id = bacster_genome.id and bacster_genome.organism_id = bacster_organism.id and bacster_bacsession.session_id =%s", [session_id])
+        cursor.execute("SELECT *, bacster_bacsession.id bacsession_id \
+                        FROM bacster_organism,   \
+                             bacster_genome,     \
+                             bacster_bacset,     \
+                             bacster_targettype, \
+                             bacster_target,     \
+                             bacster_bac,        \
+                             bacster_bacsession  \
+                        WHERE bacster_bacsession.bac_id = bacster_bac.id and           \
+                              bacster_bac.bacset_id = bacster_bacset.id and            \
+                              bacster_bac.target_id = bacster_target.id and            \
+                              bacster_target.targettype_id = bacster_targettype.id and \
+                              bacster_bacset.genome_id = bacster_genome.id and         \
+                              bacster_genome.organism_id = bacster_organism.id and     \
+                              bacster_bacsession.session_id =%s", [session_id])
         desc = cursor.description
         all = [
                 dict(zip([col[0] for col in desc], row))
@@ -109,7 +123,23 @@ def tabix_interval(request, bacsession_id):
 def format_jbrowse(request, bacsession_id, region):
             cursor = connection.cursor()
             genome = region.split(':')[0] 
-            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM  bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session, bacster_genome WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacsession.id =%s and bacster_genome.label =%s", [bacsession_id, genome])
+            cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id, bacster_targettype.label as targettype\
+                            FROM  bacster_bacsession,\
+                                  bacster_bac,       \
+                                  bacster_target,    \
+                                  bacster_bacset,    \
+                                  bacster_organism,  \
+                                  bacster_session,   \
+                                  bacster_genome,    \
+                                  bacster_targettype \
+                            WHERE bacster_bacsession.bac_id = bacster_bac.id and           \
+                                  bacster_bac.bacset_id = bacster_bacset.id and            \
+                                  bacster_bac.target_id = bacster_target.id and            \
+                                  bacster_bacset.genome_id = bacster_organism.id and       \
+                                  bacster_bacsession.session_id = bacster_session.id and   \
+                                  bacster_target.targettype_id = bacster_targettype.id and \
+                                  bacster_bacsession.id =%s and                            \
+                                  bacster_genome.label =%s", [bacsession_id, genome])
             desc = cursor.description
             all = [
                     dict(zip([col[0] for col in desc], row))
@@ -127,13 +157,15 @@ def format_jbrowse(request, bacsession_id, region):
             end        = len if int(end) > int(len) else end
             ext_region = genome + ":" + str(start) + "-" + str(end)            
             #var = region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)
-            #sys.stderr.write("len: " + str(len))            
-            #return HttpResponse(json.dumps(region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)), content_type="text/plain")
+            #sys.stderr.write("input region : " + str(region))
+            if (all[0]['targettype'] == 'coordinates'):
+                return HttpResponse(json.dumps({"url": region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)}), content_type="application/json")
+            else: 
+                return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
             
-            return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
+      
 
-
-def collect_tracks(request, bacsession_id):
+def collect_tracks(request, session_id, organism):
         cursor = connection.cursor()
         cursor.execute("SELECT *, bacster_organism.label organism, bacster_bacset.label as gff_ref, bacster_bacsession.session_id as session_id, bacster_session.pioneer_id as pioneer_id FROM bacster_bacsession, bacster_bac, bacster_target, bacster_bacset, bacster_organism, bacster_session WHERE bacster_bacsession.bac_id= bacster_bac.id and bacster_bac.bacset_id = bacster_bacset.id and bacster_bac.target_id = bacster_target.id and bacster_bacset.genome_id = bacster_organism.id and bacster_bacsession.session_id = bacster_session.id and bacster_bacsession.id =%s", [bacsession_id])
         desc = cursor.description
@@ -145,3 +177,5 @@ def collect_tracks(request, bacsession_id):
         regex    = re.compile(r'\(([a-zA-Z ]+)\)')
         organism = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
 
+        
+        return HttpResponseRedirect("http://" + collect_results(id, organism))
