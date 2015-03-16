@@ -163,58 +163,36 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       $state.go('nav.search-result');
     } else {
 
-    function format_jbrowse(bacsession_id, coords) {
-        var jb = new FormatJbrowse.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
+      function format_jbrowse(bacsession_id, coords) {
+        return function(resolve, reject) {
+          var jb = new FormatJbrowse.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
                  var time = new Date().getTime();          
-                 console.log("adding a track..." + bacsession_id + " / " + coords +" ; url:  "+ jbrowse.url + " time: " + time);
-                 session.data().search.jbrowse = jbrowse.url;
-                 session.save();
-        });
-    }
-
-    function jb() {
-      var defer = $q.defer();   
-      var promises = [];
-      
-      function foo() {
-
-	  console.log("IM foo....");
-	  return defer.resolve();
+                 console.log("adding a track..." + bacsession_id + " / " + coords +" ; url:  "+ jbrowse.url + " time-1: " +time);
+                 if (jbrowse.url) {
+                   session.data().search.jbrowse = jbrowse.url;
+                   resolve(session.save());
+	         } else {
+   	           reject({"error":"no track data"});
+                 }
+          });
+        }
       }
+
       // Open JBrowse in a new tab when search targets are coords: 
       var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){ 
-          var count = 0;
+          var promises = [];
 	  angular.forEach(gettar, function(val, key) {
-	         promises.push(format_jbrowse(val.bacsession_id, val.coords));
-		 count += 1;	
-      	         console.log("now... "+ val.bacsession_id+ "; " + val.coords + " ; count: " + count);           	     
+            var pr = new Promise(format_jbrowse(val.bacsession_id, val.coords));
+	    promises.push(pr);
 	  });
 
-          $q.all(promises).then(defer.resolve())
-          .then(function(){
-	      var time = new Date().getTime();
-	      console.log("after resolve 1... " + time)
-	  })
+          $q.all(promises)
 	  .then(function(){
-	      var time = new Date().getTime();
-              console.log("after resolve 2... " + time)
-	      })
-	  .then(function(){
-              var time = new Date().getTime();
-              console.log("after resolve 3... " +time)
-	      })
-	  .then(function(){
-	      var time = new Date().getTime();
-              console.log("after resolve 4... " + time)
-	      });
+              var time2 = new Date().getTime();
+              $window.open("http://" + session.data().search.jbrowse);     	
+              console.log("opening jbrowse, time-2: " +time2);
+	   });
       });
-      return defer.promise;
-     } //jb
-     
-	 jb();
-         //foo();
-         $window.open("http://" + session.data().search.jbrowse);     
-
     }
   }
   
