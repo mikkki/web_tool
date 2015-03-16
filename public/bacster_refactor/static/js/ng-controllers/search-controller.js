@@ -265,21 +265,14 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
-  $scope.allowSearchTarget = function(targetType) {
-    /*
-    if(! $scope.targetType) {
-      return true; // allow either type of serch
-    }
-
-    return $scope.targetType == targetType;
-    */
-    
+  $scope.allowSearchTarget = function(targetType) {    
     if( (! session.data().search) || (! session.data().search.targettype)) {
       return true; // allow either type of serch
     }
-
-    return session.data().search.targettype == targetType;
-    
+    if ( (targetType == 'coordinates') && ($scope.myData.length == 1) ) {
+	return false; // do not allow search for more than one coord target
+    }
+    return session.data().search.targettype == targetType;    
   };
 
   // callback for fasta example data button
@@ -377,13 +370,13 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   };
   
-  // restore the user's selection for organism
-  $scope.organism = session.data().search.organism;
+  // restore the user''s selection for organism
+  $scope.data.organism = session.data().search.organism;
   if($scope.data.organism) {
      $scope.onOrganism($scope.data.organism, true);
   }
   
-  // restore user's selection for genome
+  // restore user''s selection for genome
   $scope.data.genome = session.data().search.genome;
   if($scope.data.genome) {
     $scope.onGenome($scope.data.genome, true);
