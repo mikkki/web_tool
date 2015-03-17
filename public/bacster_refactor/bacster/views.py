@@ -86,7 +86,7 @@ def bacsessions(request, session_id):
 
 def bacitem(request, feature_id):
         cursor = connection.cursor()
-        cursor.execute("SELECT id, feature_id, feature_type, seqid, start, end, CAST(score as CHAR) score, bacset_id FROM bacster_bacitem where feature_id =%s", [feature_id])
+        cursor.execute("SELECT id, feature_id, feature_type, seqid, start, end, CAST(score as CHAR) score, bacset_id, confidence FROM bacster_bacitem where confidence != 'fail' and feature_id =%s", [feature_id])
         desc = cursor.description
         all = [
                 dict(zip([col[0] for col in desc], row))

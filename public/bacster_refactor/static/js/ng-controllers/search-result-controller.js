@@ -8,7 +8,8 @@
 app.controller('searchResultController', function($scope, $state, $http, $resource, $location,
                Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
 
-  $scope.results = [];
+  $scope.results_low = [];
+  $scope.results_high = [];
 
   if(! $scope.data) {
       $scope.data = {};
@@ -43,16 +44,24 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
                          angular.forEach(db_data, function(dbval, dbkey) {
   		           var link = dbval.seqid+":"+dbval.start+"-"+dbval.end;  
-   		           this.push(     {
-			       'Query'      : val.Query,                                       //blast: Query,
-			       'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
-			       'E-Value'    : val.e_value,                                     //blast: E_value,
-			       'Identities' : val.Identities,                                  //blast: Identities,
-			       'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
-                               'bacsession_id'   : bval, 
-			       'chrpos'          : link, 
-			   }); 
-			 }, $scope.results);    
+			   var rec = {
+                               'Query'      : val.Query,                                       //blast: Query,
+                               'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
+                               'E-Value'    : val.e_value,                                     //blast: E_value,
+                               'Identities' : val.Identities,                                  //blast: Identities,
+                               'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
+                               'bacsession_id'   : bval,
+                               'chrpos'          : link,
+                               'confidence'      : dbval.confidence == "low" ? "Submit for BAC Screening" : "Visually Select Best BAC",
+			   };
+
+                           if (dbval.confidence == "low" ) {
+    		             $scope.results_low.push(rec);
+			   } else {
+  		             $scope.results_high.push(rec);
+                           }
+			   console.log(dbval.feature_id + " has confidence " + $scope.results_low);
+			 });    
                      }); 
                  });
 	     });
@@ -60,27 +69,48 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
        });
   });
 
-  $scope.data.gridOptions = {
-    data: 'results',    
+  $scope.data.gridOptionsHigh = {
+    data: 'results_high',    
     enableRowSelection: false,
     plugins: [new ngGridFlexibleHeightPlugin()],
-
-
     columnDefs: [{ field: 'Query', displayName: 'Query' },
   	         { field: 'Bac ID', displayName: 'Bac ID' },
 		 { field: 'E-Value', displayName: 'E-Value' },
 		 { field: 'Identities', displayName: 'Identities' },
 		 { field: 'Subject Length', displayName: 'Subject Length' },
                  { field: 'bacsession_id', visible: false },
-	         { field: 'chrpos', 
-                   displayName: 'ChrPos', 
+		 { field: 'chrpos', displayName: 'ChrPos' },
+	         { field: 'confidence', 
+                   displayName: 'Action', 
                    cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
-                                    <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(col.field) }}{% endverbatim %}" target="_blank">\
+                                    <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" target="_blank">\
                                       {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
                                     </a>\
                                   </div>' }
                 ]
   };
+
+
+  $scope.data.gridOptionsLow = {
+    data: 'results_low',
+    enableRowSelection: false,
+    plugins: [new ngGridFlexibleHeightPlugin()],
+    columnDefs: [{ field: 'Query', displayName: 'Query' },
+                 { field: 'Bac ID', displayName: 'Bac ID' },
+                 { field: 'E-Value', displayName: 'E-Value' },
+                 { field: 'Identities', displayName: 'Identities' },
+                 { field: 'Subject Length', displayName: 'Subject Length' },
+                 { field: 'bacsession_id', visible: false },
+                 { field: 'chrpos', displayName: 'ChrPos' },
+                 { field: 'confidence',
+		 displayName: 'Action',
+		 cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
+                                    <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" target="_blank">\
+                                      {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
+                                    </a>\
+                                  </div>' }
+                ]
+	};
 
 /*
   $scope.$on('ngGridEventData', function(){
@@ -94,8 +124,5 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
       });
   };
 */
-
-  //console.log($scope.data.gridOptions);  
-
 
 });

@@ -1,6 +1,6 @@
 <!-- partial for nav state nav.search-result -->
 
-<h2>Search</h2>
+<h2>Search results</h2>
 
 <div class="k-block k-error-colored"
      ng-show="error">
@@ -9,11 +9,16 @@
 </div>
 
 <div class="k-block">
-  <div class="k-header">Results</div>
-  <div ng-show="! results.length"><img src="/static/images/ajax-loader.gif"></div>
-  <div width="100%" class="gridStyle" ng-grid="data.gridOptions"  ng-if="results.length > 0"></div>
+  <div class="k-header">High Confidence</div>
+  <div ng-show="! results_high.length"><img src="/static/images/ajax-loader.gif"></div>
+  <div width="100%" class="gridStyle" ng-grid="data.gridOptionsHigh" ng-if="results_high.length > 0"></div>
 </div>
-
-<p>Loaded results:  {{ results.length }}</p>
-
+<p>Loaded results:  {{ results_high.length }}</p>
+</br>
+<div class="k-block">
+  <div class="k-header">Low Confidence</div>
+  <div ng-show="! results_low.length"><img src="/static/images/ajax-loader.gif"></div>
+  <div width="100%" class="gridStyle" ng-grid="data.gridOptionsLow" ng-if="results_low.length > 0"></div>
+</div>
+<p>Loaded results:  {{ results_low.length }}</p>
 
