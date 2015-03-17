@@ -44,7 +44,7 @@ class BacItem(models.Model):
 	STRAND = (('+', '+'),('-','-'))
 
 	bacset     = models.ForeignKey(BacSet)
-	feature_id = models.CharField(max_length=150)                          # Col9: attributes->ID
+	feature_id = models.CharField(max_length=150)                          # Col9: attributes->Parent
 	seqid      = models.CharField(max_length=150)                          # Col1
 	source     = models.CharField(max_length=150)                          # Col2
         feature_type = models.CharField(max_length=150)                        # Col3
@@ -53,6 +53,7 @@ class BacItem(models.Model):
 	score      = models.DecimalField(max_digits=16, decimal_places=6)      # Col6
 	strand     = models.CharField(max_length=1,                            # Col7
 				      choices=STRAND)
+        confidence = models.CharField(max_length=50, blank=True, null=True)    # Col9: attributes->color 
 
 class sessionCRUDView(NgCRUDView):
 	model = Session
