@@ -41,6 +41,7 @@ def run_tabix(coords, organism, gff_ref):
 def region_to_jbrowse2(region, gff_ref, id, organism):
 	url         = os.environ['JBROWSE_URL']
 	db_path     = str("/home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/tabix_gffs/" + organism)
+	loc         = region.replace("-", "..")
         track_label = gff_ref + "_" + region.replace(":", "_")
         check_path  = str(os.environ['JBROWSE_HOME'] + "/" + id + "/" + organism + "/" + track_label)
 	main_path   = str(os.environ['JBROWSE_HOME'] + "/" + id + "/" + organism)
@@ -92,8 +93,8 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
                 return False
 
 	sys.stdout.write(str(url + id + "/" + organism + "/main/\n"))
-
-	return str(url + id + "/" + organism + "/main/")
+	
+	return str(url + id + "/" + organism + "/main/&loc=" + loc + "&tracks=" + track_label)
 
 
 def collect_results(id, organism):
