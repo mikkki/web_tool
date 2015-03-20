@@ -3,6 +3,33 @@
 var app = angular.module('bacster', ['ui.router', 'kendo.directives',
 				      'ngCookies', 'ngGrid', 'ngResource', 'ngRoute']);
 
+// defining directive 'dynamic' to be used for dynamic generation of html:
+app.directive('dynamic', function ($compile) {
+    return {
+      restrict: 'A',
+      replace: true,
+      link: function (scope, ele, attrs) {
+	  scope.$watch(attrs.dynamic, function(html) {
+	      ele.html(html);
+	      $compile(ele.contents())(scope);
+	  });
+      }
+    };
+});
+
+app.directive('a', function() {
+    return {
+      restrict: 'E',
+      link: function(scope, elem, attrs) {
+	  if(attrs.ngClick || attrs.href === '' || /^#dynamic-/.test(attrs.href)){
+	      elem.on('click', function(e){
+		  e.preventDefault();
+	      });
+	  }
+      }
+    };
+});
+
 app.config( function($httpProvider, $stateProvider, $urlRouterProvider) {
   /* Create url routes, and a root ui state named 'nav'. All other ui
    * states are declared to be children of nav. Nav state partials
