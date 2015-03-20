@@ -96,11 +96,11 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	             { field: 'confidence', 
                        displayName: 'Action', 
                        cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
-                                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/ \
-                                       {% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" target="_blank">\
-                                         {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
-                                       </a>\
-                                     </div>' }
+                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" \
+                       target="_blank">\
+                         {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
+                       </a>\
+                       </div>' }
                    ]
                  };
 
@@ -118,11 +118,11 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      { field: 'confidence',
 		       displayName: 'Action',
 		       cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
-                                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/ \
-                                      {% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" target="_blank">\
-                                        {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
-                                      </a>\
-                                     </div>' }
+                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" \
+                       target="_blank">\
+                         {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
+                       </a>\
+                       </div>' }
                    ]
 	         };
 
