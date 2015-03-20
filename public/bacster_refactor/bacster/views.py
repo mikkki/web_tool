@@ -161,8 +161,8 @@ def format_jbrowse(request, bacsession_id, region):
             if (all[0]['targettype'] == 'coordinates'):
                 return HttpResponse(json.dumps({"url": region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)}), content_type="application/json")
             else: 
-                return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
-            
+                #return HttpResponseRedirect("http://" + region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism))
+                return HttpResponse(json.dumps({"url":   region_to_jbrowse2(ext_region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)}), content_type="application/json")
       
 
 def collect_tracks(request, session_id, organism):

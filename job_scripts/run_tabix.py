@@ -46,20 +46,25 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
         check_path  = str(os.environ['JBROWSE_HOME'] + "/" + id + "/" + organism + "/" + track_label)
 	main_path   = str(os.environ['JBROWSE_HOME'] + "/" + id + "/" + organism)
 	main        = os.environ['JBROWSE_HOME']
+	client_conf = str("--clientConfig '{ \"color\":\"function(f) { return f.get('\\''color'\\'');  }\"}'")
 
         if os.path.isdir(check_path):
 		sys.stderr.write("instance:" + track_label + " exists\n")
 		return str(url + id + "/" + organism + "/main/")
 
-	cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures --out " + '$JBROWSE_HOME/' + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label
-	#sys.stdout.write(str(cmd))
+	#cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures " + client_conf + " --out " + main + "/" + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label
+	cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures --out " + main + "/" + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label + " " + client_conf
+	#cmd   = "flatfile-to-json.pl --gff <( " + "tabix " + db_path + "/" + gff_ref + "*.gz " + region + " ) --trackType CanvasFeatures --out " + main + "/" + id + "/" + organism + "/" + track_label + " --trackLabel " + track_label
+
+	sys.stdout.write(str(cmd))
 	shell = subprocess.Popen(cmd, shell=True, executable='/bin/bash')
+
 
 	stream = shell.communicate()[0]
         code = shell.returncode
 
         if code != 0:
-        	sys.stderr.write("Track Formatting Failed: " + shell.returncode + "\n")
+        	sys.stderr.write("Track Formatting Failed: " + str(shell.returncode) + "\n")
                 return False
 
 	if not os.path.isdir(main_path + "/main"):
@@ -78,7 +83,7 @@ def region_to_jbrowse2(region, gff_ref, id, organism):
         	sys.stderr.write("Main Instance: " + main_path + "/main/tracks/" + track_label + " exists\n")
 		return str(url + id + "/" + organism + "/main/")
 
-	cmd   = "head -14 " + main_path + "/" + track_label + "/trackList.json | tail -12 | add-track-json.pl " + main_path + "/main/trackList.json;cp -r " + main_path + "/" + track_label + "/tracks/* " + main_path + "/main/tracks"
+	cmd   = "head -15 " + main_path + "/" + track_label + "/trackList.json | tail -13 | add-track-json.pl " + main_path + "/main/trackList.json;cp -r " + main_path + "/" + track_label + "/tracks/* " + main_path + "/main/tracks"
 
 #	sys.stderr.write(cmd + "\n")
 

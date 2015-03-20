@@ -5,8 +5,8 @@
  * search targets are in session.data().search.targets[]. Use $http
  * service to start search job, the display results.
  */
-app.controller('searchResultController', function($scope, $state, $http, $resource, $location, $q,
-               Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
+app.controller('searchResultController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q, $location,
+               FormatJbrowse, Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
 
   if(! $scope.data) {
       $scope.data = {};
@@ -82,6 +82,33 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    });
                  });  //json_data
 
+		 $scope.click = function (bacsession_id, chrpos) {
+                     $scope.jbrowse = '';
+		     function format_jbrowse(bacsession_id, coords) {
+			 return function(resolve, reject) {
+
+			     var jb = $resource('crud/format_jbrowse/:bacsession/:region', {"bacsession": "@bacsession", "region": "@region"}, {'query':  {method:'GET', isArray:false}});
+                             var jbquery = jb.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
+				 if (jbrowse.url) {
+                                     $scope.jbrowse = jbrowse.url;
+				     resolve();
+				 } else {
+				     reject({"error":"no track data"});
+				 }
+			     });
+			 }
+		     }
+                     var promises = [];
+		     var pr = new Promise(format_jbrowse(bacsession_id, chrpos));
+		     promises.push(pr);
+                     $q.all(promises)
+		     .then(function(){
+			 // TODO: make sure the tracks are added to the SAME window instaed of opening a new one for each track:
+  		         $window.open("http://" + $scope.jbrowse, "JBrowse"+bacsession_id);
+			 console.log("opening jbrowse .. ");
+		     });        
+                 }    
+
                  $scope.gridOptionsHigh = {
                    data: 'results_high_'+bval,    
                    enableRowSelection: false,
@@ -96,7 +123,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	             { field: 'confidence', 
                        displayName: 'Action', 
                        cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
-                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" \
+                       <a href="" ng-click="click(row.getProperty(\'bacsession_id\'), row.getProperty(\'chrpos\'))" \
                        target="_blank">\
                          {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
                        </a>\
@@ -118,7 +145,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      { field: 'confidence',
 		       displayName: 'Action',
 		       cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
-                       <a href="'+window.location.origin+'/bacster/crud/format_jbrowse/{% verbatim %}{{ row.getProperty(\'bacsession_id\') }}{% endverbatim %}/{% verbatim %}{{ row.getProperty(\'chrpos\') }}{% endverbatim %}" \
+                       <a href="" ng-click="click(row.getProperty(\'bacsession_id\'), row.getProperty(\'chrpos\'))" \
                        target="_blank">\
                          {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
                        </a>\
