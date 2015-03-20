@@ -82,7 +82,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    });
                  });  //json_data
 
-                 var gridOptionsHigh = {
+                 $scope.gridOptionsHigh = {
                    data: 'results_high_'+bval,    
                    enableRowSelection: false,
                    plugins: [new ngGridFlexibleHeightPlugin()],
@@ -104,7 +104,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    ]
                  };
 
-                 var gridOptionsLow = {
+                 $scope.gridOptionsLow = {
                    data: 'results_low_'+bval,
                    enableRowSelection: false,
                    plugins: [new ngGridFlexibleHeightPlugin()],
@@ -126,8 +126,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    ]
 	         };
 
-                 eval('$scope.data.gridOptionsHigh_'+bval+'=gridOptionsHigh');
-                 eval('$scope.data.gridOptionsLow_'+bval+'=gridOptionsLow');
+                 eval('$scope.data.gridOptionsHigh_'+bval+'=$scope.gridOptionsHigh');
+                 eval('$scope.data.gridOptionsLow_'+bval+'=$scope.gridOptionsLow');
 
                });
             } 
