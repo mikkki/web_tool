@@ -2,11 +2,6 @@
 
 <h2>Search</h2>
 
-<div class="k-block k-error-colored"
-     ng-show="data.error">
-  <div class="k-header">Error</div>
-  {{ data.error }}
-</div>
 <div class="k-block k-info-colored">
   <ol>
     <li>
@@ -61,6 +56,12 @@
       <div class="k-header">	
 	Add search targets
       </div>
+      <div class="k-block k-error-colored"
+          ng-show="data.error">
+       <div class="k-header k-error-colored">Error</div>
+       {{ data.error }}
+      </div>
+
       <div class="gridStyle"
 	   ng-grid="data.gridOptions"
 	   ng-if="myData.length > 0">

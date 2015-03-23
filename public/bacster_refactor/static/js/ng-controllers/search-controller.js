@@ -163,34 +163,23 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       $state.go('nav.search-result');
     } else {
 
-      function format_jbrowse(bacsession_id, coords) {
-        return function(resolve, reject) {
-          var jb = new FormatJbrowse.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
-                 var time = new Date().getTime();          
-                 console.log("adding a track..." + bacsession_id + " / " + coords +" ; url:  "+ jbrowse.url + " time-1: " +time);
-                 if (jbrowse.url) {
-                   session.data().search.jbrowse = jbrowse.url;
-                   resolve(session.save());
-	         } else {
-   	           reject({"error":"no track data"});
-                 }
-          });
-        }
-      }
-
-      // Open JBrowse in a new tab when search targets are coords: 
-      var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){ 
+    // Open JBrowse in a new tab when search targets are coords: 
+    var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){ 
           var promises = [];
+          var jb_url   = '';
 	  angular.forEach(gettar, function(val, key) {
-            var pr = new Promise(format_jbrowse(val.bacsession_id, val.coords));
+	    var pr = new Promise(function(resolve, reject) {
+		  var jb = new FormatJbrowse.query({bacsession: val.bacsession_id, region: val.coords}, function(jbrowse){
+  		    jb_url = jbrowse.url;
+		    resolve(jb_url);
+		  });
+	    });
 	    promises.push(pr);
 	  });
 
           $q.all(promises)
 	  .then(function(){
-              var time2 = new Date().getTime();
-              $window.open("http://" + session.data().search.jbrowse);     	
-              console.log("opening jbrowse, time-2: " +time2);
+            $window.open("http://" + jb_url);     	
 	   });
       });
     }
@@ -296,6 +285,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   function save_target(target) {
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
+      $scope.data.error = '';
 
       var tt = Targettype.get({label: searchmode}, function(){
 	  var tt_id = tt.pk;
@@ -304,7 +294,34 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	  session.save();
 	  var new_target;
           if (searchmode == 'fasta') {
-              new_target = new Target({seq: target, coords: "-", targettype: tt_id});
+            var header = target.split("\n")[0];
+            // limit the length of target seq to 25K:
+  	    if((target.length - header.length - 1) > 25000) {
+	      $scope.data.error = 'The length of your FASTA target is '+(target.length - header.length - 1)+'. Please make sure the target sequence does not exceed 25K.';
+              return false;
+	    }
+            var found = false;
+	    var pr = new Promise(
+  	      function(resolve, reject) {
+                var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
+                  angular.forEach(gettar, function(val, key) {
+                    if (header == val.seq.split("\n")[0]) {
+                      found = true;
+                      resolve(found);
+       	            }
+                  });
+                });
+              }
+            );
+            // make sure the header is unique (per sission):           
+            pr.then(function(){
+	      if (found) {
+		$scope.data.error = 'You have already added a FASTA target with a header '+header+'. A header must be unique.';
+		return false;
+	      }
+	    });
+
+            new_target = new Target({seq: target, coords: "-", targettype: tt_id});
 	  } else {
 	      new_target = new Target({seq: "-", coords: target, targettype: tt_id});
           }
