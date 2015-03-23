@@ -120,8 +120,7 @@
 	  http://www.html5rocks.com/en/tutorials/file/dndfiles/
 	  http://bgrins.github.io/filereader.js/
 	  -->
-	  <input class="k-group" type="file" id="file" name="file"/>
-	  <button class="k-button" ng-click="onUploadFileFasta()">Upload FASTA file</button>
+	  <input class="k-group" type="file" id="file" name="file"/><button class="k-button" ng-click="onUploadFileFasta()">Upload FASTA file</button>
 	</fieldset>
 	<fieldset>
 	  <button type="button" class="k-button k-primary"
@@ -170,7 +169,8 @@
     <fieldset ng-show="myData.length">
       <button type="submit"
 	      class="k-button k-primary"
-	      value="Search">
+	      value="Search"
+              ng-click="onSearch()">
 	<span class="k-icon k-i-search"></span>
 	Search
       </button>

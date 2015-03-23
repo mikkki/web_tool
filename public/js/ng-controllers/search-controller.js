@@ -140,11 +140,12 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // callback for search form is submitted. the searchResultController will
   // handle the search job & present results.
-  $scope.search = function() {
-
-    //if(session.data().search.targets.length == 0) {
-    //  $scope.data.error = 'Please add search targets';
-   // }
+  $scope.onSearch = function() {
+    $scope.data.error = '';
+    if (! session.data().search.targettype) {
+      $scope.data.error = 'Please specify target type.';
+      return false;
+    }
     
     // copy current selections from select widgets, if ng-change did not fire
     // for these values
@@ -223,6 +224,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // callback for add search target button;  mode is either 'fasta' or
   // 'coordinates'
   $scope.onSetSearchTargetMode = function(mode) {
+    $scope.data.error = '';
     $scope.data.searchTargetMode = mode;
     if(! mode) {
       $scope.data.addCoords = null;
@@ -244,6 +246,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // callback for fasta example data button
   $scope.onAddExampleFasta = function() {
+    $scope.data.error = '';
     $http({method: 'GET', url: '{{ STATIC_URL }}samples/search-example.fa'}).
       success(function(data, status, headers, config) {
 	$scope.data.addFasta = data;
@@ -255,6 +258,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
  
   // callback for clearing list of search targets
   $scope.onClearTargets = function() {
+    $scope.data.error = '';    
     var clear = $window.confirm('Are you absolutely sure you want to clear the targets?');   
 
     if (clear) {
@@ -348,7 +352,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // callback for add coordinates search target
   $scope.onAddCoordsData = function(coordinates) {
-
+    $scope.data.error = '';
     save_target(coordinates);
 
     // this stays:
@@ -357,7 +361,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
    // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
-
+    $scope.data.error = '';
     save_target(fasta);
   
     //this stays:
@@ -383,9 +387,16 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     $scope.onDbS($scope.data.dbs, true);
   }
 
-  $scope.onUploadFileFasta = function(){
+  $scope.onUploadFileFasta= function(){
+    $scope.data.error = '';
+   
     var f = document.getElementById('file').files[0],
     r = new FileReader();
+    if (! f) {
+      $scope.data.error = 'No file has been selected. Please select a file.';
+      return false;
+    }
+
     r.onloadend = function(e){   
   
       //get the data via $http:   
@@ -395,11 +406,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
         }).
 	error(function(filedata) {
           $scope.data.addFasta = filedata || "Request failed";
-      });
-   
+        });  
     }
 
     //The target.result property will contain the file''s data encoded as a data URL:
-    r.readAsDataURL(f);
+    r.readAsDataURL(f); 
   }
 });
