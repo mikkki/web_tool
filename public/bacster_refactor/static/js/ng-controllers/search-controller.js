@@ -136,7 +136,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     }
   };
  
-  $scope.data.genomeSource = { 'type' : 'json', 'data' : [] };
+  if( ! session.data().search.organism) {
+    session.data().search.organism = $scope.data.organism;
+  }
+
+  $scope.data.genomeSource = { 'type' : 'json', 'data' : genomeReferences[session.data().search.organism] };
 
   // callback for search form is submitted. the searchResultController will
   // handle the search job & present results.
@@ -205,9 +209,17 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       session.save();
     }
   };
-  
-  $scope.data.dbsSource = { 'type' : 'json', 'data' : [] };
-  
+
+  if( ! session.data().search.genome) {
+    session.data().search.genome = $scope.data.genome;
+  }
+
+  $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[session.data().search.genome] };
+
+  if( ! session.data().search.dbs) {
+    session.data().search.dbs = $scope.data.dbs;
+  }
+
   // callback for user selected a dbs dataset
   $scope.onDbS = function(taintedDbs, dontPersist) {
     var persist = (dontPersist == undefined) ? true : false;
