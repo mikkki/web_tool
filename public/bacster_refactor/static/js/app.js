@@ -37,11 +37,11 @@ app.config( function($httpProvider, $stateProvider, $urlRouterProvider) {
    */
   $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   $stateProvider
-    .state('nav', {
+   .state('nav', {
       url: '/',
       templateUrl: '{{ STATIC_URL }}partials/nav.html',
       controller : 'navController'
-    })
+    }) 
     .state('nav.home', {
       url: 'home',
       templateUrl: '{{ STATIC_URL }}partials/nav.home.html',
@@ -80,7 +80,7 @@ app.config( function($httpProvider, $stateProvider, $urlRouterProvider) {
       controller: 'sessionController'
     })  
     .state('nav.logs', {
-      url: 'logs',
+      url: 'logs/:requestId',
       templateUrl: '{{ STATIC_URL }}partials/nav.logs.html',
       controller : 'workLogController'
     });

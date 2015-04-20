@@ -8,7 +8,8 @@ from djangular.views.crud import NgCRUDView
 
 class Session(models.Model):
         pioneer_id = models.CharField(max_length=50)
-        notes = models.CharField(max_length=150)
+        notes      = models.CharField(max_length=150)
+        manager    = models.SmallIntegerField(max_length=1, default=0, blank=False, null=False) 
 
 class Organism(models.Model):
 	label    = models.CharField(max_length=150)
