@@ -54,6 +54,7 @@ class BacItem(models.Model):
 	strand     = models.CharField(max_length=1,                            # Col7
 				      choices=STRAND)
         confidence = models.CharField(max_length=50, blank=True, null=True)    # Col9: attributes->color 
+        bacid      = models.CharField(max_length=150, blank=True, null=True)   # BAC IDs are provided by pioneer
 
 class sessionCRUDView(NgCRUDView):
 	model = Session
