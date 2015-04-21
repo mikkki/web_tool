@@ -41,7 +41,7 @@ app.controller('sessionController', ['$scope', 'Session', '$state', 'session', f
     };
     session.save();
 
-    var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes});
+    var new_session = new Session({pioneer_id: $scope.user.pioneerId, notes: $scope.user.notes, manager: 0});
     new_session.$save(function(){
       //storing the database session id in the cookie session:
       session.data().user.id = new_session.pk;
