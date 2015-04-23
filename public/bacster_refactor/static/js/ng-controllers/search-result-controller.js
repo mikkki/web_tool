@@ -13,7 +13,32 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   }
 
   $scope.tablist = '';  
-  $scope.tabcontent ='';
+  $scope.tabcontent ='';  
+
+  function create_tabs(first_tab, bval, query) {
+	 	       $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" aria-controls="dynamic-'+bval+'" role="tab" data-toggle="tab">'+query+'</a></li>');
+                       if (first_tab) { first_tab = ' active'; }
+                       // dynamically adding a tab pane:    	             
+                       $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
+                       <div class="k-block" ng-if="results_high_'+bval+'.length > 0">\
+                         <div class="k-header">High Confidence</div>\
+                         <div ng-show="! results_high_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
+                         <div width="100%" class="gridStyle" ng-grid="data.gridOptionsHigh_'+bval+'" ng-if="results_high_'+bval+'.length > 0"></div>\
+                       </div>\
+                       </br>\
+                       <div class="k-block" ng-if="results_low_'+bval+'.length > 0">\
+                         <div class="k-header">Low Confidence</div>\
+                         <div ng-show="! results_low_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
+                         <div width="100%" class="gridStyle" ng-grid="data.gridOptionsLow_'+bval+'" ng-if="results_low_'+bval+'.length > 0"></div>\
+                       </div>\
+                       </br>\
+                       <div class="k-block" ng-if="results_nohit_'+bval+'.length > 0">\
+                         <div class="k-header">No Hits</div>\
+                         <div ng-show="! results_nohit_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
+                         <div width="100%" class="gridStyle" ng-grid="data.gridOptionsNohit_'+bval+'" ng-if="results_nohit_'+bval+'.length > 0"></div>\
+                       </div>\
+                       </div>');
+  }
 
   var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
       var bacsessions = [];
@@ -27,40 +52,35 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	   eval(results_low);
            var results_high = '$scope.results_high_'+bval+' = [];'
 	   eval(results_high);
+           var results_nohit = '$scope.results_nohit_'+bval+' = [];'
+           eval(results_nohit);
 
  	   if(session.data().search.targettype == "fasta" ){
              console.log("bacsess: " + bval );
 	     var json_results = Blast_targets.query({bacsession: bval}, function(json_data){
+
                  var count_inner = 0;
                  angular.forEach(json_data, function(val, key) {
-                   console.log("val.Query: " + val.Query + " count_inner : " + count_inner);
+                   var query;
                    if (count_inner === 0) {
+                       if (val.Subject) {
+		         query = val.Query;  
+		       } else {
+		         query = val.seq.match(/>([^\s]+)\s/)[1];
+		       }
                        //dynamically adding a nav tab:
-	 	       $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" aria-controls="dynamic-'+bval+'" role="tab" data-toggle="tab">'+val.Query+'</a></li>');
-                       if (first_tab) { first_tab = ' active'; }
-                       // dynamically adding a tab pane:    	             
-                       $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
-                       <div class="k-block">\
-                         <div class="k-header">High Confidence</div>\
-                         <div ng-show="! results_high_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
-                         <div width="100%" class="gridStyle" ng-grid="data.gridOptionsHigh_'+bval+'" ng-if="results_high_'+bval+'.length > 0"></div>\
-                       </div>\
-                       </br>\
-                       <div class="k-block">\
-                         <div class="k-header">Low Confidence</div>\
-                         <div ng-show="! results_low_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
-                         <div width="100%" class="gridStyle" ng-grid="data.gridOptionsLow_'+bval+'" ng-if="results_low_'+bval+'.length > 0"></div>\
-                       </div>\
-                       </div>');
+		       create_tabs(first_tab, bval, query);
                        if (first_tab) { first_tab = ''; }   	             
-		   }
+	           }
                    count_inner++;
-		   var feature_id = val.Subject.match(/^([^_]+)_/)[1];
-                   //get the record(s) from bacster_bacitem corresponding to this feature_id:
-		   var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
-                     angular.forEach(db_data, function(dbval, dbkey) {
-  		       var link = dbval.seqid+":"+dbval.start+"-"+dbval.end;  
-		       var rec = {
+
+		   if (val.Subject) {       // in case there are hits:
+ 		     var feature_id = val.Subject.match(/^([^_]+)_/)[1];
+                     //get the record(s) from bacster_bacitem corresponding to this feature_id:
+		     var positions = Bacitem.query({feature_id: feature_id}, function(db_data){
+                       angular.forEach(db_data, function(dbval, dbkey) {
+  		         var link = dbval.seqid+":"+dbval.start+"-"+dbval.end;  
+		         var rec = {
                                'Query'      : val.Query,                                       //blast: Query,
                                'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
                                'E-Value'    : val.e_value,                                     //blast: E_value,
@@ -69,24 +89,32 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                                'bacsession_id'   : bval,
                                'chrpos'          : link,
                                'confidence'      : dbval.confidence == "low" ? "Submit for BAC Screening" : "Visually Select Best BAC",
-		       };
+		         };
                            
-                       if (dbval.confidence == "low" ) {
-		         // adding a record to the low confidence list of results:  
-			 eval('$scope.results_low_'+bval+'.push(rec)');
-		       } else {
- 		         //adding a record to the high confidence list of results:
-			 eval('$scope.results_high_'+bval+'.push(rec)');
-                       }
-		     });    
-                   });
+                         if (dbval.confidence == "low" ) {
+		           // adding a record to the low confidence list of results:  
+			   eval('$scope.results_low_'+bval+'.push(rec)');
+		         } else {
+ 		           //adding a record to the high confidence list of results:
+			   eval('$scope.results_high_'+bval+'.push(rec)');
+                         }
+		       });    
+                     });
+	           }  
+		   else {  // in case no hits are found:
+		     var rec = {
+                       'Query'          : query,
+		       'bacsession_id'  : bval,
+                       'confidence'     : "No hit found - send for screening"
+                     } 
+	             eval('$scope.results_nohit_'+bval+'.push(rec)');
+		   }
                  });  //json_data
 
 		 $scope.click = function (bacsession_id, chrpos) {
                      $scope.jbrowse = '';
 		     function format_jbrowse(bacsession_id, coords) {
 			 return function(resolve, reject) {
-
 			     var jb = $resource('crud/format_jbrowse/:bacsession/:region', {"bacsession": "@bacsession", "region": "@region"}, {'query':  {method:'GET', isArray:false}});
                              var jbquery = jb.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
 				 if (jbrowse.url) {
@@ -107,7 +135,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   		         $window.open("http://" + $scope.jbrowse, "JBrowse"+bacsession_id);
 			 console.log("opening jbrowse .. ");
 		     });        
-                 }    
+                 }                   
 
                  $scope.gridOptionsHigh = {
                    data: 'results_high_'+bval,    
@@ -153,8 +181,26 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    ]
 	         };
 
+                 $scope.gridOptionsNohit = {
+                   data: 'results_nohit_'+bval,
+                   enableRowSelection: false,
+                   plugins: [new ngGridFlexibleHeightPlugin()],
+                   columnDefs: [{ field: 'Query', displayName: 'Query' },
+				{ field: 'bacsession_id', visible: false },
+				{ field: 'confidence',
+				displayName: 'Action',
+				cellTemplate: '<div class="ngCellText" ng-class="col.colIndex()">\
+                       <a href="" ng-click="click(row.getProperty(\'bacsession_id\'), undef)" \
+                       target="_blank">\
+                         {% verbatim %} {{ row.getProperty(col.field) }} {% endverbatim %}\
+                       </a>\
+                       </div>' }
+                   ]
+		 };
+
                  eval('$scope.data.gridOptionsHigh_'+bval+'=$scope.gridOptionsHigh');
                  eval('$scope.data.gridOptionsLow_'+bval+'=$scope.gridOptionsLow');
+                 eval('$scope.data.gridOptionsNohit_'+bval+'=$scope.gridOptionsNohit');
 
                });
             } 

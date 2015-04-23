@@ -103,7 +103,12 @@ def blast(request, bacsession_id):
                     dict(zip([col[0] for col in desc], row))
                     for row in cursor.fetchall()
                   ]
-            return HttpResponse(blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", "")), content_type="application/json")
+            blast_result = blast_targets(all[0]['seq'], all[0]['label'].split('.')[0].replace("\"", ""))
+
+            if blast_result == '[]': #no hits
+                return HttpResponse(json.dumps(all), content_type="application/json")
+            else:
+                return HttpResponse(blast_result, content_type="application/json")
 
 
 def tabix_interval(request, bacsession_id):
