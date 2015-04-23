@@ -86,7 +86,7 @@ def bacsessions(request, session_id):
 
 def bacitem(request, feature_id):
         cursor = connection.cursor()
-        cursor.execute("SELECT id, feature_id, feature_type, seqid, start, end, CAST(score as CHAR) score, bacset_id, confidence FROM bacster_bacitem where confidence != 'fail' and feature_id =%s", [feature_id])
+        cursor.execute("SELECT id, feature_id, feature_type, seqid, start, end, CAST(score as CHAR) score, bacset_id, confidence, bacid FROM bacster_bacitem where confidence != 'fail' and feature_id =%s", [feature_id])
         desc = cursor.description
         all = [
                 dict(zip([col[0] for col in desc], row))
@@ -181,6 +181,5 @@ def collect_tracks(request, session_id, organism):
         id       = str(all[0]['pioneer_id']) + '-' + str(all[0]['session_id'])
         regex    = re.compile(r'\(([a-zA-Z ]+)\)')
         organism = regex.search(all[0]['organism']).group(1).lower().replace(" ", "_")
-
-        
+       
         return HttpResponseRedirect("http://" + collect_results(id, organism))

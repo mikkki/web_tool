@@ -82,7 +82,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   		         var link = dbval.seqid+":"+dbval.start+"-"+dbval.end;  
 		         var rec = {
                                'Query'      : val.Query,                                       //blast: Query,
-                               'Bac ID'     : dbval.feature_id,                                //db:    feature_id,
+                               'BAC'        : dbval.feature_id,                                //db:    feature_id,
+                               'BAC ID'     : dbval.bacid,                                //db:    feature_id,
                                'E-Value'    : val.e_value,                                     //blast: E_value,
                                'Identities' : val.Identities,                                  //blast: Identities,
                                'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
@@ -142,7 +143,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    enableRowSelection: false,
                    plugins: [new ngGridFlexibleHeightPlugin()],
                    columnDefs: [{ field: 'Query', displayName: 'Query' },
-  	             { field: 'Bac ID', displayName: 'Bac ID' },
+   		     { field: 'BAC', displayName: 'BAC' },
+		     { field: 'BAC ID', displayName: 'BAC ID' },
 		     { field: 'E-Value', displayName: 'E-Value' },
 		     { field: 'Identities', displayName: 'Identities' },
 		     { field: 'Subject Length', displayName: 'Subject Length' },
@@ -164,7 +166,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                    enableRowSelection: false,
                    plugins: [new ngGridFlexibleHeightPlugin()],
                    columnDefs: [{ field: 'Query', displayName: 'Query' },
-                     { field: 'Bac ID', displayName: 'Bac ID' },
+                     { field: 'BAC', displayName: 'BAC' },
+   		     { field: 'BAC ID', displayName: 'BAC ID' },
                      { field: 'E-Value', displayName: 'E-Value' },
                      { field: 'Identities', displayName: 'Identities' },
                      { field: 'Subject Length', displayName: 'Subject Length' },
@@ -201,7 +204,6 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                  eval('$scope.data.gridOptionsHigh_'+bval+'=$scope.gridOptionsHigh');
                  eval('$scope.data.gridOptionsLow_'+bval+'=$scope.gridOptionsLow');
                  eval('$scope.data.gridOptionsNohit_'+bval+'=$scope.gridOptionsNohit');
-
                });
             } 
         }); //bacsessions
