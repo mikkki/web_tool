@@ -76,28 +76,36 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     resolve(dbsDatasets);
   });
 
+  var pr4 = new Promise(function(resolve, reject){
+      if( ! session.data().search.organism) {
+	  session.data().search.organism = $scope.data.organism;
+      }
+      session.save();
+  });
+
+  var pr5 = new Promise(function(resolve, reject){
+      console.log("loading genomes for organism " + session.data().search.organism);
+      $scope.data.genomeSource  = { 'type' : 'json', 'data' : genomeReferences[session.data().search.organism]};
+      resolve($scope.data.genomeSource);
+  });
+
+  var pr6 = new Promise(function(resolve, reject){
+      if( ! session.data().search.genome) {
+	  session.data().search.genome = $scope.data.genome;
+      }
+      session.save();
+  });
+
+  var pr7 = new Promise(function(resolve, reject){
+      console.log("loading dbs for genome " + session.data().search.genome);
+      $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[session.data().search.genome] };
+      resolve($scope.data.dbsSource);
+  });
+
   var init_promises = [];
-  init_promises.push(pr1, pr2, pr3);
+  init_promises.push(pr1, pr2, pr3, pr4, pr5, pr6, pr7);
 
   $q.all(init_promises)
-    .then(function(){
-        if( ! session.data().search.organism) {
-            session.data().search.organism = $scope.data.organism;
-        }
-        session.save();
-    })
-    .then(function(){
-      $scope.data.genomeSource  = { 'type' : 'json', 'data' : genomeReferences[session.data().search.organism]};
-    })
-    .then(function(){
-	if( ! session.data().search.genome) {
-            session.data().search.genome = $scope.data.genome;
-        }
-        session.save();
-    })
-    .then(function(){
-	$scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[session.data().search.genome] };
-    })
     .then(function(){        
 	if( ! session.data().search.dbs) {
 	    session.data().search.dbs = $scope.data.dbs;

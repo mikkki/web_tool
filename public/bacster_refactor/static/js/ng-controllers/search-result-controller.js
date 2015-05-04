@@ -20,19 +20,19 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                        if (first_tab) { first_tab = ' active'; }
                        // dynamically adding a tab pane:    	             
                        $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
-                       <div class="k-block" ng-if="results_high_'+bval+'.length > 0">\
+                       <div class="k-block" ng-show="results_high_'+bval+'.length">\
                          <div class="k-header">High Confidence</div>\
                          <div ng-show="! results_high_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
                          <div width="100%" class="gridStyle" ng-grid="data.gridOptionsHigh_'+bval+'" ng-if="results_high_'+bval+'.length > 0"></div>\
                        </div>\
                        </br>\
-                       <div class="k-block" ng-if="results_low_'+bval+'.length > 0">\
+                       <div class="k-block" ng-show="results_low_'+bval+'.length">\
                          <div class="k-header">Low Confidence</div>\
                          <div ng-show="! results_low_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
                          <div width="100%" class="gridStyle" ng-grid="data.gridOptionsLow_'+bval+'" ng-if="results_low_'+bval+'.length > 0"></div>\
                        </div>\
                        </br>\
-                       <div class="k-block" ng-if="results_nohit_'+bval+'.length > 0">\
+                       <div class="k-block" ng-show="results_nohit_'+bval+'.length">\
                          <div class="k-header">No Hits</div>\
                          <div ng-show="! results_nohit_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
                          <div width="100%" class="gridStyle" ng-grid="data.gridOptionsNohit_'+bval+'" ng-if="results_nohit_'+bval+'.length > 0"></div>\
