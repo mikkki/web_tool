@@ -391,7 +391,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	  } else {
 	      target = target.replace(/,/g, '').replace(/\s/g, '');
               if ($scope.genomes[$scope.data.organism][$scope.data.genome]['label'] !== target.split(":")[0]) {
-		  $scope.data.error = 'You have entered a chromosome name that does not match your selecetion from the "Genome" drop-down list.';
+		  $scope.data.error = 'You have entered a chromosome name "'+target.split(":")[0]+'" which does not match your selection in the "Genome" drop-down list.';
 		  return false;
               } else if($scope.genomes[$scope.data.organism][$scope.data.genome]['len'] < target.split("-")[1]) {
 		  $scope.data.error = 'You have entered an "end" coordinate ' + target.split("-")[1] +' which exceeds the length of ' + target.split(":")[0] + '. \
