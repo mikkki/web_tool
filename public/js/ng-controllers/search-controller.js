@@ -33,7 +33,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   var pr1 = new Promise(function(resolve, reject){
     var o = Organism.query({}, function(){
       $scope.data.organismSource = { 'type' : 'json', 'data' : o };
+
     });
+    console.log("0. loading organisms in a promise..." + JSON.stringify(o));
     resolve($scope.data.organismSource);
   });
 
@@ -42,6 +44,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    */
 
   var genomeReferences = {};
+  $scope.genomes       = {};
 
   var pr2 = new Promise(function(resolve, reject){
     var g = Genome.query({}, function(){
@@ -51,6 +54,15 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           } else {
               this[genome.organism] = [{ 'genomeName' : genome.label, 'id' : genome.pk}];
           }
+          if(! $scope.genomes[genome.organism]) {
+	    $scope.genomes[genome.organism] = {};
+	  } 
+          if (! $scope.genomes[genome.organism][genome.pk]) {
+	      $scope.genomes[genome.organism][genome.pk] = {};
+          }
+          $scope.genomes[genome.organism][genome.pk]['label'] = genome.label;                     
+          $scope.genomes[genome.organism][genome.pk]['len'] = genome.len;
+
       }, genomeReferences);
     });
     resolve(genomeReferences);
@@ -76,42 +88,32 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     resolve(dbsDatasets);
   });
 
-  var pr4 = new Promise(function(resolve, reject){
-      if( ! session.data().search.organism) {
-	  session.data().search.organism = $scope.data.organism;
-      }
-      session.save();
-  });
-
-  var pr5 = new Promise(function(resolve, reject){
-      console.log("loading genomes for organism " + session.data().search.organism);
-      $scope.data.genomeSource  = { 'type' : 'json', 'data' : genomeReferences[session.data().search.organism]};
-      resolve($scope.data.genomeSource);
-  });
-
-  var pr6 = new Promise(function(resolve, reject){
-      if( ! session.data().search.genome) {
-	  session.data().search.genome = $scope.data.genome;
-      }
-      session.save();
-  });
-
-  var pr7 = new Promise(function(resolve, reject){
-      console.log("loading dbs for genome " + session.data().search.genome);
-      $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[session.data().search.genome] };
-      resolve($scope.data.dbsSource);
-  });
-
   var init_promises = [];
-  init_promises.push(pr1, pr2, pr3, pr4, pr5, pr6, pr7);
+  init_promises.push(pr1, pr2, pr3);
 
-  $q.all(init_promises)
-    .then(function(){        
-	if( ! session.data().search.dbs) {
-	    session.data().search.dbs = $scope.data.dbs;
-	}
-	session.save();
-    });
+  $q.all(init_promises).then(function() {
+      if( ! session.data().search.organism) {
+          session.data().search.organism = $scope.data.organism;
+      }
+      session.save();           
+      console.log("1. organism :  " +  $scope.data.organism);
+      $scope.data.genomeSource  = { 'type' : 'json', 'data' : genomeReferences[$scope.data.organism] };
+  }).then(function() {
+      if( ! session.data().search.genome) {
+          session.data().search.genome = $scope.data.genome;
+      }
+      session.save();
+      console.log("2. genome :  " + JSON.stringify($scope.data.genome));
+      $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[$scope.data.genome] };
+  }).then(function(dbs) {
+      if( ! session.data().search.dbs) {
+	  session.data().search.dbs = $scope.data.dbs;
+      }
+      session.save();
+      console.log("3. dbs : " + JSON.stringify($scope.data.dbs));
+  }); 
+  
+
 
   /*
    * data options
@@ -237,7 +239,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       });
     }
   }
-  
+
   // callback for user selected a genome
   $scope.onGenome = function(taintedGenome, dontPersist) {
     var persist = (dontPersist == undefined) ? true : false;               
@@ -278,9 +280,15 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   $scope.onSetSearchTargetMode = function(mode) {
     $scope.data.error = '';
     $scope.data.searchTargetMode = mode;
+    console.log("mode is " + mode);
     if(! mode) {
       $scope.data.addCoords = null;
       $scope.data.addFasta = null;
+    }
+    // when a target has been cancelled and there are no other targets previously added, unset the search.targettype:
+    if($scope.myData.length == 0) {
+      session.data().search.targettype = null;
+      session.save();
     }
   };
 
@@ -314,8 +322,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     var clear = $window.confirm('Are you absolutely sure you want to clear the targets?');   
 
     if (clear) {
-        $scope.data.addFasta = null;
-        $scope.data.addCoords = null;
+	$scope.onSetSearchTargetMode(null);
         session.data().search.targettype = null;
         session.save();
 
@@ -329,6 +336,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                 $scope.myData.pop();
 	    });
 	});
+
      }
 
      $scope.data.gridOptions = {
@@ -339,6 +347,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    };
 
   function save_target(target) {
+      target         = target.trim();
+      var genome     = $scope.data.genome;
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
       $scope.data.error = '';
@@ -379,7 +389,17 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
             new_target = new Target({seq: target, coords: "-", targettype: tt_id});
 	  } else {
-	      new_target = new Target({seq: "-", coords: target, targettype: tt_id});
+	      target = target.replace(/,/g, '').replace(/\s/g, '');
+              if ($scope.genomes[$scope.data.organism][$scope.data.genome]['label'] !== target.split(":")[0]) {
+		  $scope.data.error = 'You have entered a chromosome name that does not match your selecetion from the "Genome" drop-down list.';
+		  return false;
+              } else if($scope.genomes[$scope.data.organism][$scope.data.genome]['len'] < target.split("-")[1]) {
+		  $scope.data.error = 'You have entered an "end" coordinate ' + target.split("-")[1] +' which exceeds the length of ' + target.split(":")[0] + '. \
+                  The length of ' + target.split(":")[0] + ' is '+$scope.genomes[$scope.data.organism][$scope.data.genome]['len']+'.';
+		  return false;
+              } else {
+  	        new_target = new Target({seq: "-", coords: target, targettype: tt_id});
+	      }
           }
 	  new_target.$save(function(){
               //new record in bacster_bac:

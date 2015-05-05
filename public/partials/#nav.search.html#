@@ -150,7 +150,7 @@
 		 size="40" autofocus>
 	  <button type="button" class="k-button"
 		  value="example-data"
-		  ng-click="data.addCoords = genomes[data.organism][data.genome]['label']+':100000-500000'">
+		  ng-click="data.addCoords = 'ZmChr0v2:100000-500000'">
 	    Example data
 	  </button>
 	</fieldset>
