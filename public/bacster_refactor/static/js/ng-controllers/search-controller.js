@@ -388,8 +388,9 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	    });
 
             new_target = new Target({seq: target, coords: "-", targettype: tt_id});
-	  } else {
-	      target = target.replace(/,/g, '').replace(/\s/g, '');
+	  } else { 
+              //coord target:
+	      target = target.replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
               if ($scope.genomes[$scope.data.organism][$scope.data.genome]['label'] !== target.split(":")[0]) {
 		  $scope.data.error = 'You have entered a chromosome name "'+target.split(":")[0]+'" which does not match your selection in the "Genome" drop-down list.';
 		  return false;

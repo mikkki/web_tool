@@ -140,11 +140,11 @@
       <div ng-if="data.searchTargetMode == 'coordinates'">
 	Add coordinates target in the format "{{ genomes[data.organism][data.genome]['label'] }}:start-end"
 	</br>
-        (e.g. {{ genomes[data.organism][data.genome]['label'] }}:100,000-500,000)
+        (e.g. {{ genomes[data.organism][data.genome]['label'] }}:100,000-500,000 or {{ genomes[data.organism][data.genome]['label'] }}:100,000..500,000)
 	<fieldset>
 	  <input type="text"
 		 name="coordinates"
-                 ng-pattern="/^(.+):([0-9,]+)-([0-9,]+)$/"
+                 ng-pattern="/^(.+):([0-9,]+)(-|..)([0-9,]+)$/"
 		 ng-model="data.addCoords"
 		 ng-trim="true"
 		 size="40" autofocus>
