@@ -83,9 +83,8 @@ app.factory('session', function($state, $cookieStore, Session) {
       $state.go('nav.new-session');
     },
     'save' : function() {
-      // store to DB instead !
       // validating data:
-      data.user.pioneerId = data.user.pioneerId.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
+      data.user.pioneerId = data.user.pioneerId.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+|\s+/g, "");
       data.user.notes     = data.user.notes.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+/g, "");
       $cookieStore.put(cid, data);
     },
