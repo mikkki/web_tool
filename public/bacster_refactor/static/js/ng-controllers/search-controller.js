@@ -28,12 +28,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    */
 
   // the available organisms loaded from the database:
-  $scope.data.organismSource = {};
+  $scope.data.organismSource = [];
 
   var pr1 = new Promise(function(resolve, reject){
     var o = Organism.query({}, function(){
-      $scope.data.organismSource = { 'type' : 'json', 'data' : o };
-
+      $scope.data.organismSource =  o;
     });
     console.log("0. loading organisms in a promise..." + JSON.stringify(o));
     resolve($scope.data.organismSource);
@@ -43,7 +42,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    * genomes
    */
 
-  var genomeReferences = {};
+  $scope.data.genomeSource = [];
   $scope.genomes       = {};
 
   var pr2 = new Promise(function(resolve, reject){
@@ -63,29 +62,29 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           $scope.genomes[genome.organism][genome.pk]['label'] = genome.label;                     
           $scope.genomes[genome.organism][genome.pk]['len'] = genome.len;
 
-      }, genomeReferences);
+      }, $scope.data.genomeSource);
     });
-    resolve(genomeReferences);
+    resolve($scope.data.genomeSource);
   });
 
   /*
    * DbS datasets
    */
 
-  var dbsDatasets = {};
+  $scope.data.dbsSource = [];
 
   var pr3 = new Promise(function(resolve, reject){
     var bs = Bacset.query({}, function(){
       angular.forEach(bs, function(bacset, key) {
-          //this refers to a dbsDatasets elem
+          //this refers to a $scope.data.dbsSource elem
           if (this[bacset.genome]) {
             this[bacset.genome].push({ 'name' : bacset.label, 'id' : bacset.pk});
   	  } else {
 	    this[bacset.genome] = [{ 'name' : bacset.label, 'id' : bacset.pk}];  
           }
-      }, dbsDatasets);
+      }, $scope.data.dbsSource);
     });
-    resolve(dbsDatasets);
+    resolve($scope.data.dbsSource);
   });
 
   var init_promises = [];
@@ -96,21 +95,16 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           session.data().search.organism = $scope.data.organism;
       }
       session.save();           
-      console.log("1. organism :  " +  $scope.data.organism);
-      $scope.data.genomeSource  = { 'type' : 'json', 'data' : genomeReferences[$scope.data.organism] };
   }).then(function() {
       if( ! session.data().search.genome) {
           session.data().search.genome = $scope.data.genome;
       }
       session.save();
-      console.log("2. genome :  " + JSON.stringify($scope.data.genome));
-      $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[$scope.data.genome] };
   }).then(function(dbs) {
       if( ! session.data().search.dbs) {
 	  session.data().search.dbs = $scope.data.dbs;
       }
       session.save();
-      console.log("3. dbs : " + JSON.stringify($scope.data.dbs));
   }); 
   
 
@@ -158,7 +152,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
 
   // widget configuration for drop-down-list
-  //$scope.data.organismSource = { 'type' : 'json', 'data' : organisms };
+  //$scope.data.organismSource = organisms ;
   
   // callback for user selected an organism
   $scope.onOrganism = function(taintedOrganism, dontPersist) {
@@ -173,10 +167,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
        session.data().search = {};
        //$scope.data.gridOptions.data = '';
     }
-
-    var useReferences = genomeReferences[organism];    
-    $scope.data.genomeSource  = { 'type' : 'json', 'data' : useReferences };
-    
+   
     // update background image showing new organism
     $('body').css('background', 'url({{ STATIC_URL }}images/' + organism + '.jpg)');
     
@@ -189,8 +180,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   if( ! session.data().search.organism) {
     session.data().search.organism = $scope.data.organism;
   }
-
-  //$scope.data.genomeSource = { 'type' : 'json', 'data' : genomeReferences[session.data().search.organism] };
 
   // callback for search form is submitted. the searchResultController will
   // handle the search job & present results.
@@ -251,16 +240,12 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
        session.data().search.dbs = null;
     }
 
-    var useDbs = dbsDatasets[genome];
-    $scope.data.dbsSource = { 'type' : 'json', 'data' : useDbs };
    if(persist) {
       // persist genome in session
       session.data().search.genome = genome;
       session.save();
     }
   };
-
-  $scope.data.dbsSource = { 'type' : 'json', 'data' : dbsDatasets[session.data().search.genome] };
 
   // callback for user selected a dbs dataset
   $scope.onDbS = function(taintedDbs, dontPersist) {

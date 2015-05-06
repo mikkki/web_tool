@@ -21,35 +21,27 @@
       <div class="k-header">	
 	Select dataset
       </div>
-      <fieldset>
 	<label>Organism
-	  <select kendo-drop-down-list
-		  k-data-source="data.organismSource"
-		  k-data-text-field="'label'"
-		  k-data-value-field="'pk'"
-		  ng-model="data.organism"
-		  ng-change="onOrganism(data.organism)">
-	  </select>
+          <select ng-model="data.organism"
+                 data-ng-options="a.pk as a.label for a in data.organismSource"
+                 ng-change="onOrganism(data.organism)">                 
+                 <option value="" disabled selected>Please Select</option>             
+          </select>
 	</label>
 	<label>Genome
-	  <select kendo-drop-down-list
-		  k-data-source="data.genomeSource"
-		  k-data-text-field="'genomeName'"
-		  k-data-value-field="'id'"
-		  ng-model="data.genome"
-		  ng-change="onGenome(data.genome)">
+	  <select ng-model="data.genome"
+	        data-ng-options="a.id as a.genomeName for a in data.genomeSource[data.organism]"
+                ng-change="onGenome(data.genome)">
+                <option value="" disabled selected>Please Select</option>
 	  </select>
 	</label>
 	<label>DbS dataset
-	  <select kendo-drop-down-list
-		  k-data-source="data.dbsSource"
-		  k-data-text-field="'name'"
-		  k-data-value-field="'id'"
-		  ng-model="data.dbs"
-		  ng-change="onDbS(data.dbs)">
-	  </select>
+          <select ng-model="data.dbs"
+                 data-ng-options="a.id as a.name for a in data.dbsSource[data.genome]"
+	         ng-change="onDbS(data.dbs)">
+                 <option value="" disabled selected>Please Select</option>
+          </select>
 	</label>
-      </fieldset>
     </div>
     <br>
     <div class="k-block">
@@ -87,14 +79,6 @@
 	  <span class="k-icon k-i-plus"></span>
 	  Add genome coordinates target
 	</button>
-     <!-- TEST -->
-        <button type="button"
-                class="k-button k-primary"
-                ng-show="allowSearchTarget('coordinates')"
-                ng-click="BlastTargets('test')">
-          Test Search
-        </button>
-     <!-- TEST -->
       </div>
       <div ng-if="data.searchTargetMode == 'fasta'">
 	Add FASTA target
