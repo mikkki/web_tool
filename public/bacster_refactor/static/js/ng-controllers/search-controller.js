@@ -34,7 +34,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     var o = Organism.query({}, function(){
       $scope.data.organismSource =  o;
     });
-    console.log("0. loading organisms in a promise..." + JSON.stringify(o));
     resolve($scope.data.organismSource);
   });
 
@@ -265,7 +264,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   $scope.onSetSearchTargetMode = function(mode) {
     $scope.data.error = '';
     $scope.data.searchTargetMode = mode;
-    console.log("mode is " + mode);
+
     if(! mode) {
       $scope.data.addCoords = null;
       $scope.data.addFasta = null;
@@ -280,12 +279,18 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
   $scope.allowSearchTarget = function(targetType) {    
-    if( (! session.data().search) || (! session.data().search.targettype)) {
-      return true; // allow either type of serch
+    if ((! session.data().search.organism) || (! session.data().search.genome) || (! session.data().search.dbs)) {
+	return false; // do not allow search in case when organism, genome or dbs are not set
     }
+
     if ( (targetType == 'coordinates') && ($scope.myData.length == 1) ) {
 	return false; // do not allow search for more than one coord target
     }
+
+    if( (! session.data().search) || (! session.data().search.targettype)) {
+      return true; // allow either type of serch
+    }
+
     return session.data().search.targettype == targetType;    
   };
 
@@ -331,15 +336,32 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
    };
 
+  function add_tar(new_target, dbs, target, searchmode) {
+      if (new_target) {
+	  new_target.$save(function(){
+              //new record in bacster_bac:
+              var new_bac = new Bac({bacset: dbs, target: new_target.pk});
+              new_bac.$save(function(){
+                  //new record in bacster_bacsession:
+                  var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
+                  new_bacsession.$save(function(){
+		      $scope.myData.push({ 'target' : target, 'search type' : searchmode});
+                  });
+              });
+	  });
+      }
+  }
+
   function save_target(target) {
       target         = target.trim();
       var genome     = $scope.data.genome;
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
       $scope.data.error = '';
-
+      console.log("genome  " + $scope.data.genome);
+      console.log("dbs  " + $scope.data.dbs);
       var tt = Targettype.get({label: searchmode}, function(){
-	  var tt_id = tt.pk;
+	  $scope.tt_id = tt.pk;
           //new record in bacster_target:
 	  session.data().search.targettype = searchmode;
 	  session.save();
@@ -351,28 +373,30 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	      $scope.data.error = 'The length of your FASTA target is '+(target.length - header.length - 1)+'. Please make sure the target sequence does not exceed 25K.';
               return false;
 	    }
-            var found = false;
 	    var pr = new Promise(
-  	      function(resolve, reject) {
+  	     function(resolve, reject) {
                 var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
+		  var found = false;
                   angular.forEach(gettar, function(val, key) {
                     if (header == val.seq.split("\n")[0]) {
-                      found = true;
+		      $scope.data.error = 'You have already added a FASTA target with a header '+header+'. A header must be unique.';
+		      console.log("0. in the promise... ");
+                      found = true; 
                       resolve(found);
-       	            }
+		    }                                     
                   });
+                  resolve(found);
                 });
               }
             );
-            // make sure the header is unique (per sission):           
-            pr.then(function(){
-	      if (found) {
-		$scope.data.error = 'You have already added a FASTA target with a header '+header+'. A header must be unique.';
-		return false;
+            // make sure the header is unique (per session):           
+	    pr.then(function(err){
+	      console.log("1. in the then... " + err);
+	      if (! err) {
+ 	        new_target = new Target({seq: target, coords: "-", targettype: $scope.tt_id});
+		add_tar(new_target, dbs, target, searchmode);
 	      }
 	    });
-
-            new_target = new Target({seq: target, coords: "-", targettype: tt_id});
 	  } else { 
               //coord target:
 	      target = target.replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
@@ -384,20 +408,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                   The length of ' + target.split(":")[0] + ' is '+$scope.genomes[$scope.data.organism][$scope.data.genome]['len']+'.';
 		  return false;
               } else {
-  	        new_target = new Target({seq: "-", coords: target, targettype: tt_id});
+  	        new_target = new Target({seq: "-", coords: target, targettype: $scope.tt_id});
+ 	        add_tar(new_target, dbs, target, searchmode);
 	      }
           }
-	  new_target.$save(function(){
-              //new record in bacster_bac:
-	      var new_bac = new Bac({bacset: dbs, target: new_target.pk});
-              new_bac.$save(function(){
-                  //new record in bacster_bacsession:
-                  var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
-                  new_bacsession.$save(function(){
-		    $scope.myData.push({ 'target' : target, 'search type' : searchmode});
-                  });
-              });
-          });
       });
 
       $scope.data.gridOptions = {

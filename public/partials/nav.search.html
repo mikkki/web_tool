@@ -24,27 +24,30 @@
 	<label>Organism
           <select ng-model="data.organism"
                  data-ng-options="a.pk as a.label for a in data.organismSource"
-                 ng-change="onOrganism(data.organism)">                 
+                 ng-change="onOrganism(data.organism)"
+                 ng-disabled="myData.length > 0">                 
                  <option value="" disabled selected>Please Select</option>             
           </select>
 	</label>
 	<label>Genome
 	  <select ng-model="data.genome"
 	        data-ng-options="a.id as a.genomeName for a in data.genomeSource[data.organism]"
-                ng-change="onGenome(data.genome)">
+                ng-change="onGenome(data.genome)"
+                ng-disabled="myData.length > 0">
                 <option value="" disabled selected>Please Select</option>
 	  </select>
 	</label>
 	<label>DbS dataset
           <select ng-model="data.dbs"
                  data-ng-options="a.id as a.name for a in data.dbsSource[data.genome]"
-	         ng-change="onDbS(data.dbs)">
+	         ng-change="onDbS(data.dbs)" 
+                 ng-disabled="myData.length > 0">                 
                  <option value="" disabled selected>Please Select</option>
           </select>
 	</label>
     </div>
     <br>
-    <div class="k-block">
+    <div class="k-block"  ng-if="data.organism && data.genome && data.dbs">
       <div class="k-header">	
 	Add search targets
       </div>
