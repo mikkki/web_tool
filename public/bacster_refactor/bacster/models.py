@@ -11,6 +11,10 @@ class Session(models.Model):
         notes      = models.CharField(max_length=150)
         manager    = models.SmallIntegerField(max_length=1, default=0, blank=False, null=False) 
 
+	def __unicode__(self):
+	    return u'%s %s %s' % (self.pioneer_id, self.notes, self.manager)
+
+
 class Organism(models.Model):
 	label    = models.CharField(max_length=150)
 
