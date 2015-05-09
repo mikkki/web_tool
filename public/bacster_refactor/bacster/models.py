@@ -18,31 +18,57 @@ class Session(models.Model):
 class Organism(models.Model):
 	label    = models.CharField(max_length=150)
 
+	def __unicode__(self):
+	    return u'%s' % (self.label)
+		    
+
 class Genome(models.Model):
 	label    = models.CharField(max_length=150)
         organism = models.ForeignKey(Organism)
         len      = models.BigIntegerField(default=0)
 
+	def __unicode__(self):
+            return u'%s %s %s' % (self.label, self.organism, self.len)
+
+		    
+
 class BacSet(models.Model):
 	label  = models.CharField(max_length=150)
 	genome = models.ForeignKey(Genome)
 
+	def __unicode__(self):
+            return u'%s %s' % (self.label, self.genome)
+
+		    
+
 class TargetType(models.Model):
 	label = models.CharField(max_length=50)
+
+	def __unicode__(self):
+            return u'%s' % (self.label)
 	
 class Target(models.Model):
 	seq    = models.TextField()
 	coords = models.CharField(max_length=50)
 	targettype = models.ForeignKey(TargetType)
 
+	def __unicode__(self):
+            return u'%s %s %s' % (self.seq, self.coords, self.targettype)
+
 class Bac(models.Model):
 	bacset = models.ForeignKey(BacSet)
 	target = models.ForeignKey(Target)
+
+	def __unicode__(self):
+            return u'%s %s' % (self.bacset, self.target)
 
 class BacSession(models.Model):
         bac = models.ForeignKey(Bac)
         session = models.ForeignKey(Session)
 
+	def __unicode__(self):
+            return u'%s %s' % (self.bac, self.session)
+		    
 class BacItem(models.Model):
 	#The first element in each tuple is the actual value to be set on the model,
 	#and the second element is the human-readable name.
@@ -60,6 +86,10 @@ class BacItem(models.Model):
 				      choices=STRAND)
         confidence = models.CharField(max_length=50, blank=True, null=True)    # Col9: attributes->color 
         bacid      = models.CharField(max_length=150, blank=True, null=True)   # BAC IDs are provided by pioneer
+
+	def __unicode__(self):
+	    return u'%s %s %s %s %s %s %s %s %s %s %s' % (self.bacset, self.feature_id, self.seqid, self.source, self.feature_type, self.start, self.end, self.score, self.strand,\
+							  self.confidence, self.bacid)
 
 class sessionCRUDView(NgCRUDView):
 	model = Session
