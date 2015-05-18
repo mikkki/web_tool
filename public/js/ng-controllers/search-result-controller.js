@@ -8,8 +8,12 @@
 app.controller('searchResultController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q, $location,
                FormatJbrowse, Blast_targets, Coord_targets, Get_targets, Bacsession, Bac, Target, Bacitem, session, workLog) {
 
+  if(! session.data().user) {
+    $state.go('nav.new-session');
+  }
+
   if(! $scope.data) {
-      $scope.data = {};
+    $scope.data = {};
   }
 
   $scope.tablist = '';  

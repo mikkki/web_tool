@@ -6,6 +6,9 @@
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q,
 					    FormatJbrowse, Session, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
+  if(! session.data().user) {  
+    $state.go('nav.new-session');
+  }
   // make session available in the view''s scope
   $scope.session = session;
 

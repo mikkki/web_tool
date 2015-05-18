@@ -6,6 +6,10 @@
  */
 app.controller('collectionController', function($scope, $state, session) {
 
+  if(! session.data().user) {
+    $state.go('nav.new-session');
+  }
+
   // make session available in the view's scope
   $scope.session = session;
   
