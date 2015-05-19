@@ -1,7 +1,7 @@
 // instantiate angular-js web app named bacster
 
 var app = angular.module('bacster', ['ui.router', 'kendo.directives',
-				      'ngCookies', 'ngGrid', 'ngResource', 'ngRoute']);
+				      'ngCookies', 'ngGrid', 'ngResource', 'ngRoute', 'ngSanitize']);
 
 // defining directive 'dynamic' to be used for dynamic generation of html:
 app.directive('dynamic', function ($compile) {
@@ -9,7 +9,7 @@ app.directive('dynamic', function ($compile) {
       restrict: 'A',
       replace: true,
       link: function (scope, ele, attrs) {
-	  scope.$watch(attrs.dynamic, function(html) {
+          scope.$watch(attrs.dynamic, function(html) {
 	      ele.html(html);
 	      $compile(ele.contents())(scope);
 	  });

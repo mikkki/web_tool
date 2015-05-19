@@ -52,9 +52,9 @@
 	Add search targets
       </div>
       <div class="k-block k-error-colored"
-          ng-show="data.error">
+          ng-if="data.error">
        <div class="k-header k-error-colored">Error</div>
-       {{ data.error }}
+       <p ng-bind-html="data.error"></p>
       </div>
 
       <div class="gridStyle"

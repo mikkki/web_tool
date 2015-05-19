@@ -264,8 +264,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // callback for add search target button;  mode is either 'fasta' or
   // 'coordinates'
-  $scope.onSetSearchTargetMode = function(mode) {
-    $scope.data.error = '';
+  $scope.onSetSearchTargetMode = function(mode, keep_errors) {
+    // clear the error messages unless explicitly instructed not to by passing 'keep_errors' argument:
+    if(! keep_errors) {
+      $scope.data.error = '';
+    }
     $scope.data.searchTargetMode = mode;
 
     if(! mode) {
@@ -281,17 +284,17 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // restrict search targets to all fasta, or all genome coordinates. (mixed
   // target types are undefined behavior )
-  $scope.allowSearchTarget = function(targetType) {    
+  $scope.allowSearchTarget = function(targetType) {
+    if ((! session.data()) || (! session.data().search) || (! session.data().search.targettype)) {
+	return true;
+    }    
+
     if ((! session.data().search.organism) || (! session.data().search.genome) || (! session.data().search.dbs)) {
 	return false; // do not allow search in case when organism, genome or dbs are not set
     }
 
-    if ( (targetType == 'coordinates') && ($scope.myData.length == 1) ) {
-	return false; // do not allow search for more than one coord target
-    }
-
-    if( (! session.data().search) || (! session.data().search.targettype)) {
-      return true; // allow either type of serch
+    if ($scope.myData.length == 1)  {
+	return false; // do not allow search for more than one target
     }
 
     return session.data().search.targettype == targetType;    
@@ -360,7 +363,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       var genome     = $scope.data.genome;
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
-      $scope.data.error = '';
+
       console.log("genome  " + $scope.data.genome);
       console.log("dbs  " + $scope.data.dbs);
       var tt = Targettype.get({label: searchmode}, function(){
@@ -370,36 +373,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	  session.save();
 	  var new_target;
           if (searchmode == 'fasta') {
-            var header = target.split("\n")[0];
-            // limit the length of target seq to 25K:
-  	    if((target.length - header.length - 1) > 25000) {
-	      $scope.data.error = 'The length of your FASTA target is '+(target.length - header.length - 1)+'. Please make sure the target sequence does not exceed 25K.';
-              return false;
-	    }
-	    var pr = new Promise(
-  	     function(resolve, reject) {
-                var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
-		  var found = false;
-                  angular.forEach(gettar, function(val, key) {
-                    if (header == val.seq.split("\n")[0]) {
-		      $scope.data.error = 'You have already added a FASTA target with a header '+header+'. A header must be unique.';
-		      console.log("0. in the promise... ");
-                      found = true; 
-                      resolve(found);
-		    }                                     
-                  });
-                  resolve(found);
-                });
-              }
-            );
-            // make sure the header is unique (per session):           
-	    pr.then(function(err){
-	      console.log("1. in the then... " + err);
-	      if (! err) {
- 	        new_target = new Target({seq: target, coords: "-", targettype: $scope.tt_id});
-		add_tar(new_target, dbs, target, searchmode);
-	      }
-	    });
+            //fasta target:
+            new_target = new Target({seq: target, coords: "-", targettype: $scope.tt_id});
+	    add_tar(new_target, dbs, target, searchmode);
+
 	  } else { 
               //coord target:
 	      target = target.replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
@@ -434,14 +411,59 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     $scope.onSetSearchTargetMode(null);
   };
 
-   // callback for add fasta search target
-  $scope.onAddFastaData = function(fasta) {
-    $scope.data.error = '';
-    save_target(fasta);
   
-    //this stays:
-    $scope.onSetSearchTargetMode(null);    
+  function validate_fasta(fasta) {
+      var fasta_targets = fasta.split("\n>");
+      var added_tars = [];
+      var errors = [];
+      $scope.data.error = '';
+      angular.forEach(fasta_targets, function(value, index) {
+	  if (!value.trim().match(/^>/)) {
+	      value = ">" + value.trim();
+	  }
+	  var header = value.split("\n")[0];
+	  var regExp = new RegExp(header, "gi");
+	  var count = (fasta.match(regExp) || []).length;
+          var open_p = "<p>";
+          var close_p = "</p>";
 
+          // header must be unique:
+          var msg = "You have added multiple FASTA targets with a header "+header+". A header must be unique.";
+          msg     = open_p + msg + close_p;
+	  if ((count > 1) && (errors.indexOf(msg) == -1)) {            
+	    this.push(msg);
+          }
+
+          // fasta length must be < 25K:
+          msg = "The length of your FASTA target "+header+" is "+ (value.length - header.length - 1)+". Please make sure the target sequence does not exceed 25K.";
+          msg   = open_p + msg + close_p;
+	  if ( ((value.length - header.length - 1) > 25000) && (errors.indexOf(msg) == -1) ) {
+	    this.push(msg);
+	  }   
+      }, errors);
+
+      if (errors.length) {
+          $scope.data.error = errors.join('');
+          console.log("then function -  data.error: " +errors.length + " ; "  + $scope.data.error);
+          return false;
+      } else {
+          return true;
+      }
+  }
+
+  // callback for add fasta search target
+  $scope.onAddFastaData = function(fasta) {
+
+    if (validate_fasta(fasta)) {
+      var fasta_targets = fasta.split("\n>");
+      angular.forEach(fasta_targets, function(value, index) {      
+        if (!value.trim().match(/^>/)) {
+	  value = ">" + value.trim();
+        }
+        save_target(value);
+      });
+    } 
+    $scope.onSetSearchTargetMode(null, 1);    
   };
   
   // restore the user''s selection for organism
