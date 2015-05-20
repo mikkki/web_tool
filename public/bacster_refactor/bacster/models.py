@@ -34,7 +34,7 @@ class Genome(models.Model):
 
 class BacSet(models.Model):
 	label  = models.CharField(max_length=150)
-	genome = models.ForeignKey(Genome)
+	organism = models.ForeignKey(Organism, default=1, blank=False, null=False)
 
 	def __unicode__(self):
             return u'%s %s' % (self.label, self.genome)

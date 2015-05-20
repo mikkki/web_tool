@@ -79,10 +79,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     var bs = Bacset.query({}, function(){
       angular.forEach(bs, function(bacset, key) {
           //this refers to a $scope.data.dbsSource elem
-          if (this[bacset.genome]) {
-            this[bacset.genome].push({ 'name' : bacset.label, 'id' : bacset.pk});
+          if (this[bacset.organism]) {
+            this[bacset.organism].push({ 'name' : bacset.label, 'id' : bacset.pk});
   	  } else {
-	    this[bacset.genome] = [{ 'name' : bacset.label, 'id' : bacset.pk}];  
+	    this[bacset.organism] = [{ 'name' : bacset.label, 'id' : bacset.pk}];  
           }
       }, $scope.data.dbsSource);
     });
@@ -158,7 +158,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   
   // callback for user selected an organism
   $scope.onOrganism = function(taintedOrganism, dontPersist) {
-    // TODO: use nGSanitize to whitelist allowed strings user input
+
     var persist = (dontPersist == undefined) ? true : false;
     
     var organism = taintedOrganism;
@@ -172,11 +172,12 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    
     // update background image showing new organism
     $('body').css('background', 'url({{ STATIC_URL }}images/' + organism + '.jpg)');
-    
+
     if(persist) {
       session.data().search.organism = organism;
       session.save();
     }
+
   };
  
   if( ! session.data().search.organism) {
@@ -196,9 +197,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     // for these values
     if( ! session.data().search.organism) {
       session.data().search.organism = $scope.data.organism;
-    }
-    if( ! session.data().search.genome) {
-      session.data().search.genome = $scope.data.genome;
     }
     if( ! session.data().search.dbs) {
       session.data().search.dbs = $scope.data.dbs;
@@ -231,7 +229,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     }
   }
 
-  // callback for user selected a genome
+  // callback for user selected a genome - not used!
   $scope.onGenome = function(taintedGenome, dontPersist) {
     var persist = (dontPersist == undefined) ? true : false;               
     var genome = taintedGenome; // TODO sanitize user input!
@@ -289,7 +287,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	return true;
     }    
 
-    if ((! session.data().search.organism) || (! session.data().search.genome) || (! session.data().search.dbs)) {
+    if ((! session.data().search.organism) || (! session.data().search.dbs)) {
 	return false; // do not allow search in case when organism, genome or dbs are not set
     }
 
@@ -470,12 +468,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   $scope.data.organism = session.data().search.organism;
   if($scope.data.organism) {
      $scope.onOrganism($scope.data.organism, true);
-  }
-  
-  // restore user''s selection for genome
-  $scope.data.genome = session.data().search.genome;
-  if($scope.data.genome) {
-    $scope.onGenome($scope.data.genome, true);
   }
   
   // restore user''s selection for dbs
