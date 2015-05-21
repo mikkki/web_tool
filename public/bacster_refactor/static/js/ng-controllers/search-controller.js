@@ -408,7 +408,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
       //check if the chr name is valid in the context of the selected ref/organism:
       if(valid_chrs.indexOf(chr) == -1) {
-          msg = 'You have entered a chromosome name "'+chr+'" which is not valid in the context of the selected Reference.';
+          msg = 'You have entered a chromosome name "'+chr+'" which is not valid in the context of the selected Reference.\n \
+          The list of valid chr names is: ' + valid_chrs.toString();
           errors.push(open_p + msg + close_p);
       } else if(end > $scope.genomes[$scope.data.organism][chr]){   //check if the end coord is greater than the length of the chromosome:
           msg = 'You have entered an "end" coordinate ' + end +' which exceeds the length of ' + chr + '. \
