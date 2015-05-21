@@ -45,7 +45,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
    */
 
   $scope.data.genomeSource = [];
-  $scope.genomes       = {};
+  $scope.genomes           = {};
 
   var pr2 = new Promise(function(resolve, reject){
     var g = Genome.query({}, function(){
@@ -56,13 +56,25 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
               this[genome.organism] = [{ 'genomeName' : genome.label, 'id' : genome.pk}];
           }
           if(! $scope.genomes[genome.organism]) {
-	    $scope.genomes[genome.organism] = {};
+	
+            $scope.genomes[genome.organism] = {};
+
+            //default chr name is used in the 'Example data':
+            $scope.genomes[genome.organism]['default'] = genome.label; 
 	  } 
-          if (! $scope.genomes[genome.organism][genome.pk]) {
-	      $scope.genomes[genome.organism][genome.pk] = {};
+
+          //maps chr name to chr len:
+          $scope.genomes[genome.organism][genome.label] = genome.len;
+
+          if (! $scope.genomes[genome.organism]['labels']) {
+            // contains a list of all valid chr names for the given ref/organism:
+            $scope.genomes[genome.organism]['labels'] = [];      
           }
-          $scope.genomes[genome.organism][genome.pk]['label'] = genome.label;                     
-          $scope.genomes[genome.organism][genome.pk]['len'] = genome.len;
+
+          $scope.genomes[genome.organism]['labels'].push(genome.label);
+
+          //$scope.genomes[genome.organism][genome.pk]['label'] = genome.label;                     
+          //$scope.genomes[genome.organism][genome.pk]['len'] = genome.len;
 
       }, $scope.data.genomeSource);
     });
@@ -97,11 +109,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           session.data().search.organism = $scope.data.organism;
       }
       session.save();           
-  }).then(function() {
-      if( ! session.data().search.genome) {
-          session.data().search.genome = $scope.data.genome;
-      }
-      session.save();
   }).then(function(dbs) {
       if( ! session.data().search.dbs) {
 	  session.data().search.dbs = $scope.data.dbs;
@@ -223,8 +230,10 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
           $q.all(promises)
 	  .then(function(){
-            $window.open("http://" + jb_url);     	
-	   });
+	    //setTimeout(function(){
+            $window.open("http://" + jb_url);
+            //}, 5000);           
+	  });
       });
     }
   }
@@ -340,6 +349,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
    };
 
+  // method for adding individual target to the db and the grid:
   function add_tar(new_target, dbs, target, searchmode) {
       if (new_target) {
 	  new_target.$save(function(){
@@ -349,6 +359,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
                   //new record in bacster_bacsession:
                   var new_bacsession = new Bacsession({bac: new_bac.pk, session: session.data().user.id});
                   new_bacsession.$save(function(){
+                      //add target to the grid:
 		      $scope.myData.push({ 'target' : target, 'search type' : searchmode});
                   });
               });
@@ -356,13 +367,11 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       }
   }
 
+  // method that does some preliminary tasks and calls add_tar():  
   function save_target(target) {
-      target         = target.trim();
-      var genome     = $scope.data.genome;
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
 
-      console.log("genome  " + $scope.data.genome);
       console.log("dbs  " + $scope.data.dbs);
       var tt = Targettype.get({label: searchmode}, function(){
 	  $scope.tt_id = tt.pk;
@@ -370,26 +379,16 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 	  session.data().search.targettype = searchmode;
 	  session.save();
 	  var new_target;
+
           if (searchmode == 'fasta') {
             //fasta target:
             new_target = new Target({seq: target, coords: "-", targettype: $scope.tt_id});
-	    add_tar(new_target, dbs, target, searchmode);
-
 	  } else { 
-              //coord target:
-	      target = target.replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
-              if ($scope.genomes[$scope.data.organism][$scope.data.genome]['label'] !== target.split(":")[0]) {
-		  $scope.data.error = 'You have entered a chromosome name "'+target.split(":")[0]+'" which does not match your selection in the "Genome" drop-down list.';
-		  return false;
-              } else if($scope.genomes[$scope.data.organism][$scope.data.genome]['len'] < target.split("-")[1]) {
-		  $scope.data.error = 'You have entered an "end" coordinate ' + target.split("-")[1] +' which exceeds the length of ' + target.split(":")[0] + '. \
-                  The length of ' + target.split(":")[0] + ' is '+$scope.genomes[$scope.data.organism][$scope.data.genome]['len']+'.';
-		  return false;
-              } else {
-  	        new_target = new Target({seq: "-", coords: target, targettype: $scope.tt_id});
- 	        add_tar(new_target, dbs, target, searchmode);
-	      }
+            //coord target:
+	    new_target = new Target({seq: "-", coords: target, targettype: $scope.tt_id}); 	
           }
+
+          add_tar(new_target, dbs, target, searchmode);
       });
 
       $scope.data.gridOptions = {
@@ -398,33 +397,61 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       };
   }
 
+  // method that validates & sanitizes the user input for coord target:
+  function validate_coords(target) {
+      target = target.trim().replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
+      var chr = target.split(":")[0];
+      var end = target.split("-")[1];
+      var valid_chrs = $scope.genomes[$scope.data.organism]['labels'];
+      $scope.data.error = '';
 
+      //check if the chr name is valid in the context of the selected ref/organism:
+      if(valid_chrs.indexOf(chr) === -1) {
+          $scope.data.error = 'You have entered a chromosome name "'+chr+'" which is not valid in the context of the selected Reference.';
+          return false;
+      } else if(end > $scope.genomes[$scope.data.organism][chr]){   //check if the end coord is greater than the length of the chromosome:
+          $scope.data.error = 'You have entered an "end" coordinate ' + end +' which exceeds the length of ' + chr + '. \
+          The length of ' + chr + ' is '+ $scope.genomes[$scope.data.organism][chr] +'.';
+          return false;
+      } else {
+	  return target;  
+      } 
+  }
 
-  // callback for add coordinates search target
-  $scope.onAddCoordsData = function(coordinates) {
-    $scope.data.error = '';
-    save_target(coordinates);
-
-    // this stays:
-    $scope.onSetSearchTargetMode(null);
-  };
-
-  
+  // method that validates & sanitizes the user input for fasta targets:
   function validate_fasta(fasta) {
+      //split fasta data into multiple fasta targets:
       var fasta_targets = fasta.split("\n>");
       var added_tars = [];
       var errors = [];
       $scope.data.error = '';
-      angular.forEach(fasta_targets, function(value, index) {
-	  if (!value.trim().match(/^>/)) {
-	      value = ">" + value.trim();
+      angular.forEach(fasta_targets, function(fasta_target, index) {
+
+          // prepend ">" which was trimmed during the split to the fasta target:
+	  if (! fasta_target.trim().match(/^>/)) {
+	      fasta_target = ">" + fasta_target.trim();
 	  }
-	  var header = value.split("\n")[0];
+	  var header = fasta_target.split("\n")[0];
+          var seq    = fasta_target.split(header)[1];
 	  var regExp = new RegExp(header, "gi");
 	  var count = (fasta.match(regExp) || []).length;
           var open_p = "<p>";
           var close_p = "</p>";
 
+          // fasta sequence must be valid:
+          var msg = "FASTA sequence "+header+" is not valid.";
+          msg     = open_p + msg + close_p;
+	  if ( (! seq.trim().match(/^[a-zA-Z\n]+$/)) && (errors.indexOf(msg) == -1) ) {
+	      this.push(msg);
+          }
+
+          // fasta header must be valid:
+	  var msg = "FASTA header "+header+" is not valid.";
+	  msg     = open_p + msg + close_p;
+	  if ( (! header.trim().match(/^>[^<>]+$/)) && (errors.indexOf(msg) == -1) ) {
+              this.push(msg);
+          }
+ 
           // header must be unique:
           var msg = "You have added multiple FASTA targets with a header "+header+". A header must be unique.";
           msg     = open_p + msg + close_p;
@@ -433,11 +460,12 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           }
 
           // fasta length must be < 25K:
-          msg = "The length of your FASTA target "+header+" is "+ (value.length - header.length - 1)+". Please make sure the target sequence does not exceed 25K.";
+          msg = "The length of your FASTA target "+header+" is "+ (fasta_target.length - header.length - 1)+". Please make sure the target sequence does not exceed 25K.";
           msg   = open_p + msg + close_p;
-	  if ( ((value.length - header.length - 1) > 25000) && (errors.indexOf(msg) == -1) ) {
+	  if ( ((fasta_target.length - header.length - 1) > 25000) && (errors.indexOf(msg) == -1) ) {
 	    this.push(msg);
 	  }   
+          added_tars.push(fasta_target);
       }, errors);
 
       if (errors.length) {
@@ -445,20 +473,25 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           console.log("then function -  data.error: " +errors.length + " ; "  + $scope.data.error);
           return false;
       } else {
-          return true;
+          return added_tars;
       }
   }
+
+  // callback for add coordinates search target
+  $scope.onAddCoordsData = function(coordinates) {
+
+    if (validate_coords(coordinates)) {
+        save_target(validate_coords(coordinates));
+    }
+    $scope.onSetSearchTargetMode(null);
+  };
 
   // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
 
     if (validate_fasta(fasta)) {
-      var fasta_targets = fasta.split("\n>");
-      angular.forEach(fasta_targets, function(value, index) {      
-        if (!value.trim().match(/^>/)) {
-	  value = ">" + value.trim();
-        }
-        save_target(value);
+      angular.forEach(validate_fasta(fasta), function(fasta_target, index) {      
+        save_target(fasta_target);
       });
     } 
     $scope.onSetSearchTargetMode(null, 1);    

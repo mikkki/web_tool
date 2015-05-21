@@ -72,14 +72,14 @@
 	  Clear targets
 	</button>
 	<button type="button" class="k-button k-primary"
-		ng-show="allowSearchTarget('fasta')"
+		ng-show="allowSearchTarget('fasta') && ! myData.length"
 		ng-click="onSetSearchTargetMode('fasta')">
 	  <span class="k-icon k-i-plus"></span>
 	  Add FASTA target
 	</button>
 	<button type="button"
 		class="k-button k-primary"
-		ng-show="allowSearchTarget('coordinates')"
+		ng-show="allowSearchTarget('coordinates') && ! myData.length"
 		ng-click="onSetSearchTargetMode('coordinates')">
 	  <span class="k-icon k-i-plus"></span>
 	  Add genome coordinates target
@@ -127,19 +127,19 @@
 	</fieldset>
       </div>      
       <div ng-if="data.searchTargetMode == 'coordinates'">
-	Add coordinates target in the format "{{ genomes[data.organism][data.genome]['label'] }}:start-end"
+	Add coordinates target in the format "{{ genomes[data.organism]['default'] }}:start-end"
 	</br>
-        (e.g. {{ genomes[data.organism][data.genome]['label'] }}:100,000-500,000 or {{ genomes[data.organism][data.genome]['label'] }}:100,000..500,000)
+        (e.g. {{ genomes[data.organism]['default'] }}:100,000-500,000 or {{ genomes[data.organism]['default'] }}:100,000..500,000)
 	<fieldset>
 	  <input type="text"
 		 name="coordinates"
-                 ng-pattern="/^(.+):([0-9,]+)(-|..)([0-9,]+)$/"
+                 ng-pattern="/^([a-zA-z0-9_\-\.]+):([0-9,]+)(-|..)([0-9,]+)$/"
 		 ng-model="data.addCoords"
 		 ng-trim="true"
 		 size="40" autofocus>
 	  <button type="button" class="k-button"
 		  value="example-data"
-		  ng-click="data.addCoords = genomes[data.organism][data.genome]['label']+':100,000-500,000'">
+		  ng-click="data.addCoords = genomes[data.organism]['default']+':100,000-500,000'">
 	    Example data
 	  </button>
 	</fieldset>
