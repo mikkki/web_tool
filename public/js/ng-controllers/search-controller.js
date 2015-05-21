@@ -372,7 +372,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       var dbs        = $scope.data.dbs;
       var searchmode = $scope.data.searchTargetMode;
 
-      console.log("dbs  " + $scope.data.dbs);
       var tt = Targettype.get({label: searchmode}, function(){
 	  $scope.tt_id = tt.pk;
           //new record in bacster_target:
@@ -400,22 +399,29 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
   // method that validates & sanitizes the user input for coord target:
   function validate_coords(target) {
       target = target.trim().replace(/,/g, '').replace(/\s/g, '').replace(/\.\./, '-');
-      var chr = target.split(":")[0];
-      var end = target.split("-")[1];
+      var chr = target.split(":")[0].trim();
+      var end = target.split("-")[1].trim();
       var valid_chrs = $scope.genomes[$scope.data.organism]['labels'];
-      $scope.data.error = '';
+      var errors = [];
+      var open_p = "<p>";
+      var close_p = "</p>";
 
       //check if the chr name is valid in the context of the selected ref/organism:
-      if(valid_chrs.indexOf(chr) === -1) {
-          $scope.data.error = 'You have entered a chromosome name "'+chr+'" which is not valid in the context of the selected Reference.';
-          return false;
+      if(valid_chrs.indexOf(chr) == -1) {
+          msg = 'You have entered a chromosome name "'+chr+'" which is not valid in the context of the selected Reference.';
+          errors.push(open_p + msg + close_p);
       } else if(end > $scope.genomes[$scope.data.organism][chr]){   //check if the end coord is greater than the length of the chromosome:
-          $scope.data.error = 'You have entered an "end" coordinate ' + end +' which exceeds the length of ' + chr + '. \
-          The length of ' + chr + ' is '+ $scope.genomes[$scope.data.organism][chr] +'.';
+          msg = 'You have entered an "end" coordinate ' + end +' which exceeds the length of ' + chr + '. \
+          The length of ' + chr + ' is '+ $scope.genomes[$scope.data.organism][chr] + '.';
+          errors.push(open_p + msg + close_p);
+      } 
+
+      if (errors.length) {
+          $scope.data.error = errors.join('');
           return false;
       } else {
 	  return target;  
-      } 
+      }      
   }
 
   // method that validates & sanitizes the user input for fasta targets:
@@ -424,7 +430,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
       var fasta_targets = fasta.split("\n>");
       var added_tars = [];
       var errors = [];
-      $scope.data.error = '';
+
       angular.forEach(fasta_targets, function(fasta_target, index) {
 
           // prepend ">" which was trimmed during the split to the fasta target:
@@ -470,7 +476,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
       if (errors.length) {
           $scope.data.error = errors.join('');
-          console.log("then function -  data.error: " +errors.length + " ; "  + $scope.data.error);
           return false;
       } else {
           return added_tars;
@@ -479,15 +484,17 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
 
   // callback for add coordinates search target
   $scope.onAddCoordsData = function(coordinates) {
+    $scope.data.error = '';
 
     if (validate_coords(coordinates)) {
         save_target(validate_coords(coordinates));
     }
-    $scope.onSetSearchTargetMode(null);
+    $scope.onSetSearchTargetMode(null, 1);
   };
 
   // callback for add fasta search target
   $scope.onAddFastaData = function(fasta) {
+    $scope.data.error = '';
 
     if (validate_fasta(fasta)) {
       angular.forEach(validate_fasta(fasta), function(fasta_target, index) {      
