@@ -111,10 +111,7 @@ STATICFILES_DIRS = (
          ("js",       os.path.join(PUBLIC_DIR, 'js')),
          ("partials", os.path.join(PUBLIC_DIR, 'partials')),
          ("samples",  os.path.join(PUBLIC_DIR, 'samples')),
-<<<<<<< HEAD
-=======
          ("djangular",  os.path.join(PUBLIC_DIR, 'djangular')),
->>>>>>> multi_object_ctc
 )
 
 STATICFILES_FINDERS = (
