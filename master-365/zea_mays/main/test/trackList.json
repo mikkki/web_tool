@@ -1,0 +1,18 @@
+{
+   "tracks" : [
+      {
+         "style" : {
+            "className" : "feature",
+            "color" : "function(f) { return f.get('color');  }"
+         },
+         "key" : "HC69_ZmChr0v2_100000-500000",
+         "storeClass" : "JBrowse/Store/SeqFeature/NCList",
+         "trackType" : "CanvasFeatures",
+         "urlTemplate" : "tracks/HC69_ZmChr0v2_100000-500000/{refseq}/trackData.json",
+         "compress" : 0,
+         "type" : "CanvasFeatures",
+         "label" : "HC69_ZmChr0v2_100000-500000"
+      }
+   ],
+   "formatVersion" : 1
+}
