@@ -1,5 +1,13 @@
 #!/usr/bin/env perl
 
+########################################################################################################################################################################################################################
+#                                                                                                                                                                                                                      #
+# Location of gff3 files: /home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer                                                                                                                                             #
+# Preliminary step - run this command for each gff3 to generate a tab delimited txt file to be parsed by this script:                                                                                                  #
+# grep mRNA <( cat /home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer/HC69.BACs.PHIv2.gff3 ) | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$9}' > ~/pioneer0212/p_bacster/job_scripts/HC69.bacitems.txt        #
+#                                                                                                                                                                                                                      #
+########################################################################################################################################################################################################################
+
 use strict;
 use warnings;
 use Getopt::Long; # get the command line options
@@ -7,11 +15,6 @@ use Pod::Usage; # so the user knows what's going on
 use DBI; # our DataBase Interface
 use DBD::mysql;
 use Switch;
-
-# Preliminary step - run these commands:
-# new files - /home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer
-# grep gene <( zcat /home/analysis/ctc/dev_p_bacster/2nd_try/p_bacster/tabix_gffs/HC69.BACs.ZmPHIv2.fixed.gff3.gz ) | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$NF}' >  HC69.bacitems.txt
-# grep mRNA <( cat /home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer/HC69.BACs.PHIv2.gff3 ) | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$9}' > ~/pioneer0212/p_bacster/job_scripts/HC69.bacitems.txt
 
  # get the command line options and environment variables
 my ($dbname, $username, $password, $host, $port, $files, $verbose);
@@ -53,6 +56,8 @@ $sth->execute() or die "Cannot execute: " . $sth->errstr();
 $sth->finish();
 
 my $count = 0 ;
+
+# map confidence codes to confidence values for each data set:
 my %conf = ( "HC69"  => { "#87CEEB" => "low", "#000080" => "high" },
              "HG11"  => { "#90EE90" => "low", "#006400" => "high" },
              "GR2HT" => { "#DDA0DD" => "low", "#800080" => "high" },

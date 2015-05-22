@@ -3,7 +3,7 @@
  *
  * Enable user interaction in nav.search ui state
  */
-app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q,
+app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q, $filter,
 					    FormatJbrowse, Session, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
 
   if(! session.data().user) {  
@@ -412,8 +412,8 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
           The list of valid chr names is: ' + valid_chrs.toString();
           errors.push(open_p + msg + close_p);
       } else if(end > $scope.genomes[$scope.data.organism][chr]){   //check if the end coord is greater than the length of the chromosome:
-          msg = 'You have entered an "end" coordinate ' + end +' which exceeds the length of ' + chr + '. \
-          The length of ' + chr + ' is '+ $scope.genomes[$scope.data.organism][chr] + '.';
+          msg = 'You have entered an "end" coordinate ' + $filter("number")(end) +' which exceeds the length of ' + chr + '. \
+          The length of ' + chr + ' is '+ $filter("number")($scope.genomes[$scope.data.organism][chr]) + '.';
           errors.push(open_p + msg + close_p);
       } 
 
