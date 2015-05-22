@@ -1,3 +1,124 @@
+from django.shortcuts import render
+import MySQLdb
 from django.db import models
+from djangular.views.crud import NgCRUDView
+#from django.views.decorators.csrf import ensure_csrf_cookie
+
+#@ensure_csrf_cookie
+
+class Session(models.Model):
+        pioneer_id = models.CharField(max_length=50)
+        notes      = models.CharField(max_length=150)
+        manager    = models.SmallIntegerField(max_length=1, default=0, blank=False, null=False) 
+
+	def __unicode__(self):
+	    return u'%s %s %s' % (self.pioneer_id, self.notes, self.manager)
+
+
+class Organism(models.Model):
+	label    = models.CharField(max_length=150)
+
+	def __unicode__(self):
+	    return u'%s' % (self.label)
+		    
+
+class Genome(models.Model):
+	label    = models.CharField(max_length=150)
+        organism = models.ForeignKey(Organism)
+        len      = models.BigIntegerField(default=0)
+
+	def __unicode__(self):
+            return u'%s %s %s' % (self.label, self.organism, self.len)
+
+		    
+
+class BacSet(models.Model):
+	label  = models.CharField(max_length=150)
+	organism = models.ForeignKey(Organism, default=1, blank=False, null=False)
+
+	def __unicode__(self):
+            return u'%s %s' % (self.label, self.genome)
+
+		    
+
+class TargetType(models.Model):
+	label = models.CharField(max_length=50)
+
+	def __unicode__(self):
+            return u'%s' % (self.label)
+	
+class Target(models.Model):
+	seq    = models.TextField()
+	coords = models.CharField(max_length=50)
+	targettype = models.ForeignKey(TargetType)
+
+	def __unicode__(self):
+            return u'%s %s %s' % (self.seq, self.coords, self.targettype)
+
+class Bac(models.Model):
+	bacset = models.ForeignKey(BacSet)
+	target = models.ForeignKey(Target)
+
+	def __unicode__(self):
+            return u'%s %s' % (self.bacset, self.target)
+
+class BacSession(models.Model):
+        bac = models.ForeignKey(Bac)
+        session = models.ForeignKey(Session)
+
+	def __unicode__(self):
+            return u'%s %s' % (self.bac, self.session)
+		    
+class BacItem(models.Model):
+	#The first element in each tuple is the actual value to be set on the model,
+	#and the second element is the human-readable name.
+	STRAND = (('+', '+'),('-','-'))
+
+	bacset     = models.ForeignKey(BacSet)
+	feature_id = models.CharField(max_length=150)                          # Col9: attributes->Parent
+	seqid      = models.CharField(max_length=150)                          # Col1
+	source     = models.CharField(max_length=150)                          # Col2
+        feature_type = models.CharField(max_length=150)                        # Col3
+	start      = models.CharField(max_length=50)                           # Col4
+	end        = models.CharField(max_length=50)                           # Col5
+	score      = models.DecimalField(max_digits=16, decimal_places=6)      # Col6
+	strand     = models.CharField(max_length=1,                            # Col7
+				      choices=STRAND)
+        confidence = models.CharField(max_length=50, blank=True, null=True)    # Col9: attributes->color 
+        bacid      = models.CharField(max_length=150, blank=True, null=True)   # BAC IDs are provided by pioneer
+
+	def __unicode__(self):
+	    return u'%s %s %s %s %s %s %s %s %s %s %s' % (self.bacset, self.feature_id, self.seqid, self.source, self.feature_type, self.start, self.end, self.score, self.strand,\
+							  self.confidence, self.bacid)
+
+class sessionCRUDView(NgCRUDView):
+	model = Session
+	slug_field = 'pioneer_id' #not unique!! cannot be used as slug_field
+	
+class organismCRUDView(NgCRUDView):
+        model = Organism
+	slug_field = 'label'
+
+class genomeCRUDView(NgCRUDView):
+        model = Genome
+        slug_field = 'label'
+
+class bacsetCRUDView(NgCRUDView):
+	model = BacSet
+	slug_field = 'label'
+
+class targettypeCRUDView(NgCRUDView): 
+        model = TargetType
+        slug_field = 'label' 
+
+class targetCRUDView(NgCRUDView):
+	model = Target
+
+class bacCRUDView(NgCRUDView):
+	model = Bac
+
+class bacsessionCRUDView(NgCRUDView):
+	model = BacSession
+
 
 # Create your models here.

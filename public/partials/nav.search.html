@@ -2,11 +2,6 @@
 
 <h2>Search</h2>
 
-<div class="k-block k-error-colored"
-     ng-show="data.error">
-  <div class="k-header">Error</div>
-  {{ data.error }}
-</div>
 <div class="k-block k-info-colored">
   <ol>
     <li>
@@ -26,62 +21,65 @@
       <div class="k-header">	
 	Select dataset
       </div>
-      <fieldset>
-	<label>Organism
-	  <select kendo-drop-down-list
-		  k-data-source="data.organismSource"
-		  k-data-text-field="'commonName'"
-		  k-data-value-field="'id'"
-		  ng-model="data.organism"
-		  ng-change="onOrganism(data.organism)">
-	  </select>
+	<label>Reference
+          <select ng-model="data.organism"
+                 data-ng-options="a.pk as a.label for a in data.organismSource"
+                 ng-change="onOrganism(data.organism)"
+                 ng-disabled="myData.length > 0">                 
+                 <option value="" disabled selected>Please Select</option>             
+          </select>
 	</label>
+<!--
 	<label>Genome
-	  <select kendo-drop-down-list
-		  k-data-source="data.genomeSource"
-		  k-data-text-field="'genomeName'"
-		  k-data-value-field="'id'"
-		  ng-model="data.genome"
-		  ng-change="onGenome(data.genome)">
+	  <select ng-model="data.genome"
+	        data-ng-options="a.id as a.genomeName for a in data.genomeSource[data.organism]"
+                ng-change="onGenome(data.genome)"
+                ng-disabled="myData.length > 0">
+                <option value="" disabled selected>Please Select</option>
 	  </select>
 	</label>
+-->
 	<label>DbS dataset
-	  <select kendo-drop-down-list
-		  k-data-source="data.dbsSource"
-		  k-data-text-field="'name'"
-		  k-data-value-field="'id'"
-		  ng-model="data.dbs"
-		  ng-change="onDbS(data.dbs)">
-	  </select>
+          <select ng-model="data.dbs"
+                 data-ng-options="a.id as a.name for a in data.dbsSource[data.organism]"
+	         ng-change="onDbS(data.dbs)" 
+                 ng-disabled="myData.length > 0">                 
+                 <option value="" disabled selected>Please Select</option>
+          </select>
 	</label>
-      </fieldset>
     </div>
     <br>
-    <div class="k-block">
+    <div class="k-block"  ng-if="data.organism && data.dbs">
       <div class="k-header">	
 	Add search targets
       </div>
+      <div class="k-block k-error-colored"
+          ng-if="data.error">
+       <div class="k-header k-error-colored">Error</div>
+       <p ng-bind-html="data.error"></p>
+      </div>
+
       <div class="gridStyle"
 	   ng-grid="data.gridOptions"
-	   ng-show="session.data().search.targets.length">
+	   ng-if="myData.length > 0">
       </div>
       <br>
       <div ng-if="! data.searchTargetMode">
 	<button type="button" class="k-button"
-		ng-show="session.data().search.targets.length"
+		ng-show="myData.length"
 		ng-click="onClearTargets()">
 	  <span class="k-icon k-i-cancel"></span>
 	  Clear targets
 	</button>
 	<button type="button" class="k-button k-primary"
-		ng-show="allowSearchTarget('fasta')"
+		ng-show="allowSearchTarget('fasta') && ! myData.length"
 		ng-click="onSetSearchTargetMode('fasta')">
 	  <span class="k-icon k-i-plus"></span>
 	  Add FASTA target
 	</button>
 	<button type="button"
 		class="k-button k-primary"
-		ng-show="allowSearchTarget('coordinates')"
+		ng-show="allowSearchTarget('coordinates') && ! myData.length"
 		ng-click="onSetSearchTargetMode('coordinates')">
 	  <span class="k-icon k-i-plus"></span>
 	  Add genome coordinates target
@@ -111,8 +109,7 @@
 	  http://www.html5rocks.com/en/tutorials/file/dndfiles/
 	  http://bgrins.github.io/filereader.js/
 	  -->
-	  <input class="k-group" type="file" id="file" name="file"/>
-	  <button class="k-button" ng-click="onUploadFileFasta()">Upload FASTA file</button>
+	  <input class="k-group" type="file" id="file" name="file"/><button class="k-button" ng-click="onUploadFileFasta()">Upload FASTA file</button>
 	</fieldset>
 	<fieldset>
 	  <button type="button" class="k-button k-primary"
@@ -130,15 +127,19 @@
 	</fieldset>
       </div>      
       <div ng-if="data.searchTargetMode == 'coordinates'">
-	Add coordinates target
+	Add coordinates target in the format "{{ genomes[data.organism]['default'] }}:start-end"
+	</br>
+        (e.g. {{ genomes[data.organism]['default'] }}:100,000-500,000 or {{ genomes[data.organism]['default'] }}:100,000..500,000)
 	<fieldset>
 	  <input type="text"
 		 name="coordinates"
+                 ng-pattern="/^([a-zA-z0-9_\-\.]+):([0-9,]+)(-|..)([0-9,]+)$/"
 		 ng-model="data.addCoords"
+		 ng-trim="true"
 		 size="40" autofocus>
 	  <button type="button" class="k-button"
 		  value="example-data"
-		  ng-click="data.addCoords = 'Chr1:34,400..230,000'">
+		  ng-click="data.addCoords = genomes[data.organism]['default']+':100,000-500,000'">
 	    Example data
 	  </button>
 	</fieldset>
@@ -158,10 +159,11 @@
 	</fieldset>
       </div>
     </div>
-    <fieldset ng-show="session.data().search.targets.length">
+    <fieldset ng-show="myData.length">
       <button type="submit"
 	      class="k-button k-primary"
-	      value="Search">
+	      value="Search"
+              ng-click="onSearch()">
 	<span class="k-icon k-i-search"></span>
 	Search
       </button>

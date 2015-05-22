@@ -29,6 +29,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID = 1
 
 # Application definition
 
@@ -39,6 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.redirects',    
     'compressor',
     'bacster',
     'djangular',
@@ -52,6 +55,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 )
 
 ROOT_URLCONF = 'bacster_refactor.urls'
@@ -107,6 +111,10 @@ STATICFILES_DIRS = (
          ("js",       os.path.join(PUBLIC_DIR, 'js')),
          ("partials", os.path.join(PUBLIC_DIR, 'partials')),
          ("samples",  os.path.join(PUBLIC_DIR, 'samples')),
+<<<<<<< HEAD
+=======
+         ("djangular",  os.path.join(PUBLIC_DIR, 'djangular')),
+>>>>>>> multi_object_ctc
 )
 
 STATICFILES_FINDERS = (
@@ -115,3 +123,15 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS= (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.request',
+    'django.core.context_processors.csrf',
+
+)

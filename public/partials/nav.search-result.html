@@ -1,6 +1,6 @@
 <!-- partial for nav state nav.search-result -->
 
-<h2>Search</h2>
+<h2>Search results</h2>
 
 <div class="k-block k-error-colored"
      ng-show="error">
@@ -8,7 +8,14 @@
       {{ error }}
 </div>
 
-<div class="k-block">
-  <div class="k-header">Results</div>
-  TODO
+<div ng-if="! (gridOptionsHigh || gridOptionsLow || gridOptionsNohit)"><img src="/static/images/ajax-loader.gif"></div>
+
+<div role="tabpanel" id="tabpanel">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist" dynamic="tablist"></ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content" dynamic="tabcontent"></div>
+
 </div>
