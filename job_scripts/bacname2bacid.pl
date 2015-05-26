@@ -1,10 +1,14 @@
 #!/usr/bin/env perl
 
-############################################################################################################
-#                                                                                                          #
-#  Run this script only after bacster_bacitem table has been populated with data via bacitems_populate.pl  #
-#                                                                                                          #
-############################################################################################################
+###############################################################################################################
+#  1) Generate a .txt file(s) mapping feature ids to bac ids to be parsed by this script, e.g.:               #
+#                                                                                                             #
+#  zcat /home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer/HC69_DbS_BAC_assemblies_v2.fa.gz | awk  -F"_" '{if(/^>/){gsub(">","");print $1"\t"$2}}' | uniq  >/home/analysis/ctc/dev_p_bacster/JBrowse_Pioneer/HC69_DbS_BAC_assemblies_BAC_BACID.txt                                                  # 
+#                                                                                                             #
+#                                                                                                             #
+#  2) Run this script only after bacster_bacitem table has been populated with data via bacitems_populate.pl  #
+#                                                                                                             #
+###############################################################################################################
 
 use strict;
 use warnings;
