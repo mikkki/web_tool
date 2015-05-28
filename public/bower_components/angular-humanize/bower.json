@@ -1,0 +1,25 @@
+{
+  "name": "angular-humanize",
+  "main": [
+    "angular-humanize.js"
+  ],
+  "version": "0.0.0-alpha02",
+  "homepage": "http://wjmazza.github.io/angular-humanize/",
+  "description": "Formatting filters for AngularJS",
+  "keywords": [
+    "angularjs",
+    "humanize",
+    "formatting"
+  ],
+  "authors": [
+    "Walter Mazza <wjmazza@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

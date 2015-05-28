@@ -1,0 +1,34 @@
+{
+  "name": "angular-humanize",
+  "main": [
+    "angular-humanize.js"
+  ],
+  "homepage": "http://wjmazza.github.io/angular-humanize/",
+  "description": "Formatting filters for AngularJS",
+  "keywords": [
+    "angularjs",
+    "humanize",
+    "formatting"
+  ],
+  "authors": [
+    "Walter Mazza <wjmazza@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "5f3b6163e5",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "5f3b6163e5f582f76872c387a1cee95f0f2d7214"
+  },
+  "_source": "git://github.com/wjmazza/angular-humanize.git",
+  "_target": "*",
+  "_originalSource": "angular-humanize",
+  "_direct": true
+}
