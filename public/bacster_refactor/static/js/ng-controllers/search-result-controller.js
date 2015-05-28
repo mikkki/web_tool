@@ -19,8 +19,12 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   $scope.tablist = '';  
   $scope.tabcontent ='';  
 
+  // method that generates a toggable tab - each user query is displayed in its own tab
+  // for more info http://getbootstrap.com/javascript/#tabs
   function create_tabs(first_tab, bval, query) {
-	 	       $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" aria-controls="dynamic-'+bval+'" role="tab" data-toggle="tab">'+query+'</a></li>');
+
+	 	       $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" \
+                       aria-controls="dynamic-'+bval+'" role="tab" data-toggle="tab">'+query+'</a></li>');
                        if (first_tab) { first_tab = ' active'; }
                        // dynamically adding a tab pane:    	             
                        $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
