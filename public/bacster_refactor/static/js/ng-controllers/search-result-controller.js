@@ -20,14 +20,16 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   $scope.tabcontent ='';  
 
   // method that generates a toggable tab - each user query is displayed in its own tab
-  // for more info http://getbootstrap.com/javascript/#tabs
+  // for more info on toggable tabs - http://getbootstrap.com/javascript/#tabs
   function create_tabs(first_tab, bval, query) {
 
-	 	       $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" \
+      $scope.tablist = $scope.tablist.concat('<li role="presentation"'+first_tab+'><a href="#dynamic-'+bval+'" \
                        aria-controls="dynamic-'+bval+'" role="tab" data-toggle="tab">'+query+'</a></li>');
-                       if (first_tab) { first_tab = ' active'; }
-                       // dynamically adding a tab pane:    	             
-                       $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
+
+      if (first_tab) { first_tab = ' active'; }
+
+      // dynamically adding a tab pane:    	             
+      $scope.tabcontent = $scope.tabcontent.concat('<div role="tabpanel" class="tab-pane'+first_tab+'" id="dynamic-'+bval+'">\
                        <div class="k-block" ng-if="results_high_'+bval+'.length">\
                          <div class="k-header">High Confidence</div>\
                          <div ng-show="! results_high_'+bval+'.length"><img src="/static/images/ajax-loader.gif"></div>\
@@ -49,8 +51,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
   }
 
   var gettar = new Get_targets.query({session: session.data().user.id},function(gettar){
-      var bacsessions = [];
-      angular.forEach(gettar, function(val, key) {           
+         var bacsessions = [];
+         angular.forEach(gettar, function(val, key) {           
              this.push(val.bacsession_id);
 	 }, bacsessions);
 
@@ -66,14 +68,29 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
  	   if(session.data().search.targettype == "fasta" ){
              console.log("bacsess: " + bval );
 	     var json_results = Blast_targets.query({bacsession: bval}, function(json_data){
-
                  var count_inner = 0;
                  angular.forEach(json_data, function(val, key) {
+
+ 	         /*  Refer to run_blast.py:def blast_targets(query, dbs)
+                     a Blast_targets val is an object with a structure such as:
+                     {"Percent_Identity":"98.33",
+                      "Query_Stop":"60",
+                      "Subject_Length":"6262",
+                      "Query":"ZmChr0v2-2",
+                      "Query_Start":"1",
+                      "Query_Length":"2200",
+                      "e_value":"1e-19",
+                      "Identities":"58/60",
+                      "Alignment_Length":"60",
+                      "Subject":"HC69.SP17.P1.F09_cbachc69h.pk113.f9_NODE_14_length_6262"
+                      }
+                  */
+
                    var query;
                    if (count_inner === 0) {
-                       if (val.Subject) {
+                       if (val.Subject) {   // in case there are hits:
 		         query = val.Query;  
-		       } else {
+		       } else {            // in case when no hot are found:
 		         query = val.seq.match(/>([^\s]+)\s/)[1];
 		       }
                        //dynamically adding a nav tab:
@@ -91,7 +108,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		         var rec = {
                                'Query'      : val.Query,                                       //blast: Query,
                                'BAC'        : dbval.feature_id,                                //db:    feature_id,
-                               'BAC ID'     : dbval.bacid,                                //db:    feature_id,
+                               'BAC ID'     : dbval.bacid,                                     //db:    bacid,
                                'E-Value'    : val.e_value,                                     //blast: E_value,
                                'Identities' : val.Identities,                                  //blast: Identities,
                                'Subject Length'  : val.Subject_Length,                         //blast: Subject_Length,
@@ -110,7 +127,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		       });    
                      });
 	           }  
-		   else {  // in case no hits are found:
+		   else {  // in case when no hits are found:
 		     var rec = {
                        'Query'          : query,
 		       'bacsession_id'  : bval,
@@ -120,6 +137,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		   }
                  });  //json_data
 
+		 // method called on a click event in the 'Action' column     
 		 $scope.click = function (bacsession_id, chrpos) {
                      $scope.jbrowse = '';
 		     function format_jbrowse(bacsession_id, coords) {
@@ -139,7 +157,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 		     promises.push(pr);
                      $q.all(promises)
 		     .then(function(){
-			 // TODO: make sure the tracks are added to the SAME window instaed of opening a new one for each track:
+			 // tracks that are associated with the same bacsession are added to 
+                         // the same window:
   		         $window.open("http://" + $scope.jbrowse, "JBrowse"+bacsession_id);
 			 console.log("opening jbrowse .. ");
 		     });        
@@ -207,7 +226,8 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                        </div>' }
                    ]
 		 };
-
+ 
+                 // a set of three panes ('High confidence', 'Low confidence' and 'No hits') is generated per each tab:
                  eval('$scope.data.gridOptionsHigh_'+bval+'=$scope.gridOptionsHigh');
                  eval('$scope.data.gridOptionsLow_'+bval+'=$scope.gridOptionsLow');
                  eval('$scope.data.gridOptionsNohit_'+bval+'=$scope.gridOptionsNohit');
@@ -219,6 +239,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 
 
 /*
+  // code examples:
   $scope.$on('ngGridEventData', function(){
       $scope.data.gridOptions.selectRow(0, true);
       console.log("selected: " + $scope.data.gridOptions.selectedItems[0].ChrPos);
@@ -229,19 +250,4 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
 	  console.log("selected: " + data.ChrPos);
       });
   };
-*/
-
- /* angular.forEach(json_data, function(val, key) {
-   key is arr index; val is an object like:
-   {"Percent_Identity":"98.33",
-    "Query_Stop":"60",
-    "Subject_Length":"6262",
-    "Query":"ZmChr0v2-2",
-    "Query_Start":"1",
-    "Query_Length":"2200",
-    "e_value":"1e-19",
-    "Identities":"58/60",
-    "Alignment_Length":"60",
-    "Subject":"HC69.SP17.P1.F09_cbachc69h.pk113.f9_NODE_14_length_6262"
-  }
 */
