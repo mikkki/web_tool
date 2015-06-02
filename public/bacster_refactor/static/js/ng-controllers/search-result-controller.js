@@ -124,8 +124,7 @@ app.controller('searchResultController', function($scope, $state, $http, $resour
                      $scope.jbrowse = '';
 		     function format_jbrowse(bacsession_id, coords) {
 			 return function(resolve, reject) {
-			     var jb = $resource('crud/format_jbrowse/:bacsession/:region', {"bacsession": "@bacsession", "region": "@region"}, {'query':  {method:'GET', isArray:false}});
-                             var jbquery = jb.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
+                             var jbquery = FormatJbrowse.query({bacsession: bacsession_id, region: coords}, function(jbrowse){
 				 if (jbrowse.url) {
                                      $scope.jbrowse = jbrowse.url;
 				     resolve();

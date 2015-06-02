@@ -4,7 +4,8 @@
  * Enable user interaction in nav.search ui state
  */
 app.controller('searchController', function($scope, $state, $http, $resource, $cookieStore, $window, $route, $q, $filter,
-					    FormatJbrowse, Session, Organism, Genome, Bacset, Target, Targettype, Bac, Bacsession, Get_targets, session, workLog) {
+					    FormatJbrowse, Session, Organism, Genome, Bacset, Target, Targettype, Bac, 
+                                            Bacsession, BacsessionBySessionID, Get_targets, session, workLog) {
 
   if(! session.data().user) {  
     $state.go('nav.new-session');
@@ -144,21 +145,6 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
     data: 'myData',
     plugins: [new ngGridFlexibleHeightPlugin()]
   };
-
-
-  //calls blast on server side EDIT this later target does nothing, nav.search
-  $scope.BlastTargets = function(target){
-    console.log("my target is: " + target);
-    var blast = $resource('crud/blast_targets', {}, {'query':  {method:'GET', isArray:true}});
-    var json_results = blast.query({}, function(){
-      //for (var key in json_results){
-        //if (json_results.hasOwnProperty(key) && json_results[key].best_hit){
-          console.log("blast is :" + JSON.stringify(json_results));
-        //}
-      //}
-    });
-  }
-
 
   // widget configuration for drop-down-list
   //$scope.data.organismSource = organisms ;
@@ -329,8 +315,7 @@ app.controller('searchController', function($scope, $state, $http, $resource, $c
         session.data().search.targettype = null;
         session.save();
 
-        var bacsess = $resource('crud/bacsessions/:session', {session: session.data().user.id}).query({}, function(bacsess_data){
-
+        var bacsess = BacsessionBySessionID.query({session: session.data().user.id}, function(bacsess_data){
 	    angular.forEach(bacsess_data, function(bacsession, key) {
                 var target_id = bacsession.target_id
    	        var target = new Target({pk: target_id});

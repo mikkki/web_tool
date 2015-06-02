@@ -149,18 +149,18 @@ def format_jbrowse(request, bacsession_id, region):
                     dict(zip([col[0] for col in desc], row))
                     for row in cursor.fetchall()
                   ]
-                  #region, gff_ref, id, organism
+
             sys.stderr.write("input region : " + str(all[0]['reference']))
             id         = str(all[0]['pioneer_id']) + '-' + str(all[0]['session_id'])
             len        = all[0]['len']
-            # assuming that the reference has the following format 'Zea Mays B73', extracting the organism name:             
+            # assuming that the reference has a format such as 'Zea Mays B73'; extracting the organism name:             
             organism   = '_'.join(all[0]['reference'].split(' ')[0:2]).lower()
             start      = int(region.split(':')[1].split('-')[0]) - 100000
             start      = start if int(start) > 0 else 1
             end        = int(region.split(':')[1].split('-')[1]) + 100000
             end        = len if int(end) > int(len) else end
             ext_region = genome + ":" + str(start) + "-" + str(end)            
-            #var = region_to_jbrowse2(region, all[0]['gff_ref'].split('.')[0].replace("\"", ""), id, organism)
+
 
             
             if (all[0]['targettype'] == 'coordinates'):
